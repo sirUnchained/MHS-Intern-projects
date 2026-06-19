@@ -2,7 +2,7 @@
 
 An intelligent agent that fetches real-time gold futures data (`GC=F`) from Yahoo Finance, processes it into a structured SQLite database (ETL pipeline), and answers your questions using a mix of its internal data and live web searches. Built with LangGraph, Groq/LLaMA, and a Streamlit chat interface.
 
-> **Note**: In this project there is a code folder and a main.ipynb file. In the main.ipynb file I wrote a presentation of the project implementation and I wrote the project itself in the code folder.
+> **Note**: In this project there is a *code* folder and a *presentation.ipynb* file. In the *presentation.ipynb* file I wrote a presentation of the project implementation and I wrote the project itself in the *code* folder. There is also a video of testing this project in *video* folder.
 
 ## ✨ Features
 

@@ -1,9 +1,6 @@
-from langchain_core.tools import Tool
-from src.ETL.etl import read
-from sqlite3 import Connection
-
-import pandas as pd
 from langchain.tools import tool
+import pandas as pd
+from src.ETL.etl import read
 from database.db import connect_to_db
 
 
