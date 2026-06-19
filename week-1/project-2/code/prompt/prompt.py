@@ -1,6 +1,3 @@
-from langchain_core.messages import SystemMessage
-from langchain_core.prompts import ChatPromptTemplate
-
 system_prompt = """
 **You are "The MHS Golden Boy", a professional gold market analysis assistant.**
 
@@ -128,10 +125,3 @@ Be analytical, concise, objective, and evidence-driven.
 
 Always prioritize verified data over assumptions.
 """
-
-prompt_template = ChatPromptTemplate(
-    messages=[
-        SystemMessage(system_prompt),
-        ("human", "{user_prompt}"),
-    ]
-)

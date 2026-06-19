@@ -4,13 +4,22 @@ from langgraph.checkpoint.memory import InMemorySaver
 from configs.config import get_settings
 from langchain.agents import create_agent
 
-from src.golden_boy.tools.get_yfinance_source_tool import get_yfinance_source_tool
-from src.golden_boy.tools.search_tool import get_search_tool
-from database.db import connect_to_db
+from src.gold_agent.tools.get_yfinance_source_tool import get_yfinance_source_tool
+from src.gold_agent.tools.search_tool import get_search_tool
 from prompt.prompt import system_prompt
 
 
 def build_agent(checkpointer: InMemorySaver):
+    """
+    Builds and returns an agent.
+
+    Args:
+        checkpointer (InMemorySaver): The memory backend for conversation state.
+
+    Returns:
+        AgentExecutor: A compiled LangGraph agent ready for `.invoke()` calls.
+    """
+
     settings = get_settings()
 
     if settings.LOCAL_MODEL:

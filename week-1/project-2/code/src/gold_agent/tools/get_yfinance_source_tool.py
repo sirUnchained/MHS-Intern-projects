@@ -41,8 +41,9 @@ def get_yfinance_source_tool() -> str:
         if df.empty:
             return "No gold price data found in the database."
 
-        # sort it from newest to oldest
-        df = df.sort_index(ascending=False)
+        # sort it from newest to oldest, I also select first 30 row
+        # for not filling LLM context with these datas
+        df = df.sort_index(ascending=False)[:30]
 
         # Convert to markdown for LLM readability
         return df.to_markdown(index=False)

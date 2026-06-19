@@ -5,7 +5,9 @@ from configs.config import get_settings
 settings = get_settings()
 
 
-# For making a context safe program, I must make `connect_to_db` like this
+# This function handles the complete lifecycle of a database connection.
+# By using the 'with' statement, callers can execute queries safely without
+# worrying about manually closing the connection, even if an exception occurs.
 @contextlib.contextmanager
 def connect_to_db():
     """Connect to sqlite database."""

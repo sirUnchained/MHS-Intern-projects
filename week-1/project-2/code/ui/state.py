@@ -3,8 +3,8 @@ import uuid
 
 import contextvars
 from langgraph.checkpoint.memory import InMemorySaver
-from src.golden_boy.agents.main_agent import build_agent
-from src.golden_boy import context
+from src.gold_agent.agents.main_agent import build_agent
+from src.gold_agent import context
 
 
 def initialize_session_state():

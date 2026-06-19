@@ -1,69 +1,49 @@
+# ui/app.py
 import streamlit as st
-from database.db import connect_to_db
 from ui.state import initialize_session_state, reset_conversation
-from src.ETL.etl import run_pipeline
-from configs.config import get_settings
-from utils.utils import enable_proxy
-from src.golden_boy import context
+from ui.ui_backend import setup_backend
+from ui.chat_handling import process_user_message
+from utils.utils import plot_gold_prices
 
-# 0. Run ETL pipeline and setup proxy
-settings = get_settings()
-with connect_to_db() as connection:
-    run_pipeline(
-        ticker=settings.TRICKER,
-        connection=connection,
-        table_name="gold_price",
-        start_date="2025-01-01",
-        if_exists="replace",
-    )
-enable_proxy()
+# ----- Backend Setup (ETL & proxy) -----
+setup_backend()
 
-# 1. Initialize everything (runs only once per session)
+# ----- Session State Initialization -----
 initialize_session_state()
 
-# 2. UI Configuration
+# ----- UI Configuration -----
 st.set_page_config(page_title="Chat with memory", page_icon="🧠")
 st.title("🧠 Agent with short-term-memory")
-
-# Display thread ID (optional debug)
 st.caption(f"Chat ID: `{st.session_state.thread_id[:8]}...`")
 
-# New conversation button
+fig = plot_gold_prices()
+st.pyplot(fig)
+
 if st.button("🔄 Start new chat"):
     reset_conversation()
     st.rerun()
 
 st.divider()
 
-# 3. Display chat history
+# ----- Display Chat History -----
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 4. Handle user input
+# ----- Handle User Input -----
 if prompt := st.chat_input("Enter your message ..."):
-    # Append user message
+    # Show user message immediately
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Prepare config for LangGraph
-    config = {"configurable": {"thread_id": st.session_state.thread_id}}
-
-    # Get response from agent
+    # Get assistant response
     with st.chat_message("assistant"):
         with st.spinner("Thinking ..."):
-            token = context.current_thread_id.set(st.session_state.thread_id)
+            final_answer = process_user_message(
+                prompt, st.session_state.thread_id, st.session_state.agent
+            )
+        st.markdown(final_answer)
 
-            try:
-                response = st.session_state.agent.invoke(
-                    {"messages": [{"role": "user", "content": prompt}]}, config=config
-                )
-            finally:
-                context.current_thread_id.reset(token)
-
-            final_answer = response["messages"][-1].content
-            st.markdown(final_answer)
-
-    # Append assistant response
+    # Store assistant response
     st.session_state.messages.append({"role": "assistant", "content": final_answer})
