@@ -30,4 +30,5 @@ def setup_backend():
             )
 
     # Enable proxy
-    Proxy.enable_proxy()
+    if settings.USE_PROXY:
+        Proxy.enable_proxy()

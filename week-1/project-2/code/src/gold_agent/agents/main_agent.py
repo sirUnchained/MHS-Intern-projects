@@ -24,12 +24,12 @@ def build_agent(checkpointer: InMemorySaver):
 
     if settings.LOCAL_MODEL:
         llm = ChatOllama(
-            model="qwen2.5-1.5b-instruct:latest",
+            model=settings.MODEL_NAME,
             temperature=settings.TEMPERATURE,
         )
     else:
         llm = ChatGroq(
-            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            model=settings.GROQ_MODEL_NAME,
             api_key=settings.GROQ_API_KEY,
             temperature=settings.TEMPERATURE,
         )

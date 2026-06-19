@@ -12,6 +12,11 @@ class Settings:
     """
 
     # Required (will raise error if missing)
+    USE_PROXY: str = os.getenv("USE_PROXY").lower() in (
+        "true",
+        "1",
+        "yes",
+    )
     TRICKER: str = os.getenv("TRICKER")
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY")
     TAVILY_API_KEY: str = os.getenv("TAVILY_API_KEY")
@@ -22,6 +27,7 @@ class Settings:
     )
     DATABASE_PATH: str = os.getenv("DATABASE_PATH")
     MODEL_NAME: str = os.getenv("MODEL_NAME")
+    GROQ_MODEL_NAME: str = os.getenv("GROQ_MODEL_NAME")
     TEMPERATURE: float = float(os.getenv("TEMPERATURE", "0.0"))
 
     def __post_init__(self):
