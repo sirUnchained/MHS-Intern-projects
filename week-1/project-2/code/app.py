@@ -3,10 +3,10 @@ import streamlit as st
 from ui.state import initialize_session_state, reset_conversation
 from ui.ui_backend import setup_backend
 from ui.chat_handling import process_user_message
-from utils.utils import plot_gold_prices
+from helpers.helpers import plot_gold_prices
 
 # ----- Backend Setup (ETL & proxy) -----
-setup_backend()
+data = setup_backend()
 
 # ----- Session State Initialization -----
 initialize_session_state()
@@ -16,7 +16,7 @@ st.set_page_config(page_title="Chat with memory", page_icon="🧠")
 st.title("🧠 Agent with short-term-memory")
 st.caption(f"Chat ID: `{st.session_state.thread_id[:8]}...`")
 
-fig = plot_gold_prices()
+fig = plot_gold_prices(data)
 st.pyplot(fig)
 
 if st.button("🔄 Start new chat"):

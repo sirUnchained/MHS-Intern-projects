@@ -3,6 +3,7 @@ import pandas as pd
 import yfinance as yf
 from sqlite3 import Connection
 from typing import Literal
+import matplotlib.pyplot as plt
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +130,7 @@ def read(
             index_col="Date",
         )
         logger.info(f"Read {len(df)} rows from '{table_name}'")
+
         return df
     except Exception as e:
         logger.error(f"Read from '{table_name}' failed: {e}")
@@ -161,6 +163,7 @@ def run_pipeline(
     if not raw.empty:
         data = transform(raw)
         load(data, connection, table_name, if_exists)
+        return data
     else:
         logger.warning("Pipeline stopped – no data to load.")
-    return raw
+        return raw

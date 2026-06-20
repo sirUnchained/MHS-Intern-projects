@@ -1,7 +1,6 @@
 import os
-from src.ETL.etl import read
-from database.db import connect_to_db
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # you must configure it
 PROXY_URL = "http://127.0.0.1:8889"
@@ -21,10 +20,8 @@ class Proxy:
         os.environ["https_proxy"] = ""
 
 
-def plot_gold_prices():
-    """This function returns a plot uwing fetched data from yahoo finance."""
-    with connect_to_db() as conn:
-        data = read(conn, "gold_price")
+def plot_gold_prices(data: pd.DataFrame):
+    """This function returns a plot using fetched data from yahoo finance."""
 
     fig, ax = plt.subplots(figsize=(10, 6), ncols=1)
     ax.plot(data["Close"], label="Gold Price", color="gold")

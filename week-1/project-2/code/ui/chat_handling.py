@@ -1,6 +1,5 @@
-# ui/chat_handling.py
-import streamlit as st
 from src.gold_agent import context
+from langchain_core.runnables.config import RunnableConfig
 
 
 def process_user_message(prompt: str, thread_id: str, agent):
@@ -9,7 +8,7 @@ def process_user_message(prompt: str, thread_id: str, agent):
     Handles the context variable for thread_id.
     """
 
-    config = {"configurable": {"thread_id": thread_id}}
+    config = RunnableConfig({"configurable": {"thread_id": thread_id}})
     token = context.current_thread_id.set(thread_id)
     try:
         response = agent.invoke(

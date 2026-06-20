@@ -2,33 +2,31 @@ import streamlit as st
 from database.db import connect_to_db
 from src.ETL.etl import run_pipeline
 from configs.config import get_settings
-from utils.utils import Proxy
+from helpers.helpers import Proxy
 
 
 def setup_backend():
     """
-    Run the ETL pipeline (only if the gold_price table is empty)
-    and enable the proxy.
-    This function is cached to run only once per Streamlit session.
+    Run the ETL pipeline and enable the proxy. This function runs every time user
+    requests for showing uptodate data.
+
+    Returns:
+        DataFrame containing the gold price data, with 'Date' as DatetimeIndex.
     """
+
     settings = get_settings()
 
-    # Check if gold_price table already has data
     with connect_to_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM gold_price")
-        count = cursor.fetchone()[0]
-
-    if count == 0:
-        with connect_to_db() as conn:
-            run_pipeline(
-                ticker=settings.TRICKER,
-                connection=conn,
-                table_name="gold_price",
-                start_date="2025-01-01",
-                if_exists="replace",
-            )
+        data = run_pipeline(
+            ticker=settings.TRICKER,
+            connection=conn,
+            table_name="gold_price",
+            start_date="2025-01-01",
+            if_exists="replace",
+        )
 
     # Enable proxy
     if settings.USE_PROXY:
         Proxy.enable_proxy()
+
+    return data
