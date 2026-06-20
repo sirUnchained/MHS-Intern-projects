@@ -1,7 +1,5 @@
 # 🩺 Diabetes Prediction Project
 
-[![Open in Spaces](https://img.shields.io/badge/🤗-Open%20in%20Spaces-blue)](https://huggingface.co/spaces/sirunchained/diabet-analysis)
-
 ## 📋 Project Overview
 
 This project develops machine learning models to predict diabetes onset using the Pima Indians Diabetes Database. The goal is to accurately classify patients based on diagnostic measurements while handling missing data, class imbalance, and outliers.
@@ -21,10 +19,12 @@ The **Support Vector Classifier (SVC)** with default parameters (after scaling a
 | **F1-score** | **65.55%** |
 | Accuracy     | 73.38% |
 
-### Why SVC?
-- Best balance between precision and recall (F1).
-- Handles non‑linear relationships in the feature space.
-- Performed consistently across cross‑validation.
+But SVC currently dose not work with pipeline, I chosed KNN (with GridSearch) which has best scores after SVC:
+
+| Metric       | Score |
+|--------------|-------|
+| **F1-score** | **65.57%** |
+| Accuracy     | 72.73% |
 
 ---
 
@@ -89,10 +89,6 @@ Try the application directly:
 ---
 
 ## 🔧 Requirements
-
-```bash
-pip install -r requirements.txt
-```
 
 Key libraries: `pandas`, `numpy`, `matplotlib`, `seaborn`, `scikit-learn`, `imbalanced-learn`, `joblib`.
 
