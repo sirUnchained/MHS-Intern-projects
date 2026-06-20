@@ -36,3 +36,4 @@ tabulate
 yfinance
 langchain_tavily
 streamlit
+matplotlib
