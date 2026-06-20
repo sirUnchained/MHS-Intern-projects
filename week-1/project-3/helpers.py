@@ -374,6 +374,92 @@ def evaluate_classification_model(y_pred, y_test, model_name):
     }
 
 
+def plot_model_comparison(
+    model_results, metrics, title="Model Comparison", figsize=(20, 8), bar_width=0.5
+):
+    """
+    Plots comparison of models across specified metrics with no text overlap.
+
+    Args:
+        model_results: list of dicts or objects with metrics as attributes.
+                        Each element should have properties: accuracy, recall,
+                        precision, f1_score, MSE, MAE (or a subset thereof).
+        metrics: list of strings specifying which metrics to plot.
+                Example: ["accuracy", "f1_score"].
+        title: string, title for the plot.
+
+    Returns:
+        matplotlib figure object.
+    """
+
+    # Extract model names
+    model_names = []
+    for i, res in enumerate(model_results):
+        if hasattr(res, "model_name"):
+            model_names.append(res.model_name)
+        elif isinstance(res, dict) and "model_name" in res:
+            model_names.append(res["model_name"])
+        else:
+            model_names.append(f"Model {i+1}")
+
+    # Prepare data
+    metric_values = {metric: [] for metric in metrics}
+    for res in model_results:
+        for metric in metrics:
+            if isinstance(res, dict):
+                val = res.get(metric, np.nan)
+            else:
+                val = getattr(res, metric, np.nan)
+            metric_values[metric].append(val)
+
+    # Dynamic figure size: wider for more models, taller for more metrics
+    fig, ax = plt.subplots(figsize=figsize)
+    x = np.arange(len(model_names))
+
+    # Store bar containers for label placement
+    bars_list = []
+
+    for i, metric in enumerate(metrics):
+        offset = (i - (len(metrics) - 1) / 2) * bar_width
+        bars = ax.bar(x + offset, metric_values[metric], bar_width, label=metric)
+        bars_list.append(bars)
+
+        # Add labels INSIDE the bars (center) with rotation=0 for readability
+        # If values are very small, 'edge' + rotation=90 is also an option.
+        ax.bar_label(
+            bars,
+            fmt="%.3f",
+            label_type="center",
+            fontsize=8,
+            rotation=0,
+            color="white",
+            weight="bold",
+        )
+
+    # Formatting
+    ax.set_xticks(x)
+    ax.set_xticklabels(model_names, rotation=15, ha="right")
+    ax.set_ylabel("Score")
+    ax.set_title(title)
+    ax.legend(loc="upper right" if len(metrics) < 4 else "best")
+    ax.grid(axis="y", linestyle="--", alpha=0.6)
+
+    # Adjust y-axis with a small margin for error metrics if needed
+    y_max = 0
+    for vals in metric_values.values():
+        valid = [v for v in vals if not np.isnan(v)]
+        if valid:
+            y_max = max(y_max, max(valid))
+    # Add 10% margin on top; for metrics that can exceed 1 (like MSE), add more.
+    if y_max <= 1.5:
+        ax.set_ylim(0, y_max * 1.15 if y_max > 0 else 1.1)
+    else:
+        ax.set_ylim(0, y_max * 1.2)
+
+    plt.tight_layout()
+    return fig
+
+
 def find_best_model(
     models_result: list,
     metric: Literal["accuracy", "recall", "precision", "f1_score", "MSE", "MAE"],

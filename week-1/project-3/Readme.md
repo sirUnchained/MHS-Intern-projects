@@ -1,163 +1,124 @@
-# Diabetes Prediction Analysis
+# 🩺 Diabetes Prediction Project
 
-## 📋 Overview
+[![Open in Spaces](https://img.shields.io/badge/🤗-Open%20in%20Spaces-blue)](https://huggingface.co/spaces/sirunchained/diabet-analysis)
 
-This project involves developing a machine learning model to predict whether patients have diabetes based on diagnostic measurements. The analysis includes comprehensive data preprocessing, exploratory data analysis, and implementation of multiple classification algorithms to identify the best-performing model.
+## 📋 Project Overview
 
-## 📊 Dataset
+This project develops machine learning models to predict diabetes onset using the Pima Indians Diabetes Database. The goal is to accurately classify patients based on diagnostic measurements while handling missing data, class imbalance, and outliers.
 
-The dataset contains **768 samples** with the following features:
+**Dataset**: 768 samples with 8 features + target (`Outcome`).  
+**Task**: Binary classification (diabetes: 1, no diabetes: 0).  
+**Metrics**: Accuracy and F1-score (as requested by the team).
 
-| Feature | Description |
-|---------|-------------|
-| **Pregnancies** | Number of times patient has been pregnant |
-| **Glucose** | Plasma glucose concentration (2 hours after oral glucose test) - **0 = missing data** |
-| **BloodPressure** | Diastolic blood pressure (mm Hg) - **0 = missing data** |
-| **SkinThickness** | Triceps skin fold thickness (mm) - **0 = missing data** |
-| **Insulin** | 2-Hour serum insulin level (mu U/ml) - **0 = missing data** |
-| **BMI** | Body mass index (kg/m²) - **0 = missing data** |
-| **DiabetesPedigreeFunction** | Genetic risk score based on family history |
-| **Age** | Patient's age in years |
-| **Outcome** | Target variable (0 = No Diabetes, 1 = Diabetes) |
+---
 
-## 🎯 Objective
+## 🏆 Best Performing Model
 
-Build a classification model that predicts diabetes diagnosis with high accuracy and F1-score.
+The **Support Vector Classifier (SVC)** with default parameters (after scaling and SMOTE) achieved the highest F1-score with competitive accuracy:
 
-## 🔍 Exploratory Data Analysis
+| Metric       | Score |
+|--------------|-------|
+| **F1-score** | **65.55%** |
+| Accuracy     | 73.38% |
 
-### Key Findings:
+### Why SVC?
+- Best balance between precision and recall (F1).
+- Handles non‑linear relationships in the feature space.
+- Performed consistently across cross‑validation.
 
-1. **Missing Values**: Several features use 0 as a placeholder for missing data:
-   - Glucose: ~0.65% missing
-   - BloodPressure: ~4.77% missing
-   - SkinThickness: ~42% missing (highest)
-   - BMI: ~1.45% missing
+---
 
-2. **Feature Distributions**:
-   - Normally distributed: Glucose, BloodPressure, SkinThickness, BMI
-   - Right-skewed: DiabetesPedigreeFunction, Age
+## 📊 Model Performance Comparison
 
-3. **Outliers**: Insulin feature shows significant outliers
-
-4. **Class Imbalance**: Dataset is imbalanced with more non-diabetic cases
-
-5. **Correlations**: Highest correlation between Age and Pregnancies (54%)
-
-## 🛠️ Data Preprocessing
-
-### Missing Value Handling
-- **Mean Imputation**: Used for Glucose, BloodPressure, and BMI
-- **KNN Imputation**: Used for SkinThickness (42% missing)
-
-### Outlier Treatment
-- **RobustScaler**: Applied to handle outliers effectively
-
-### Class Imbalance
-- **SMOTE (Synthetic Minority Over-sampling Technique)**: Used to balance the dataset
-
-### Train-Test Split
-- 90% training, 10% testing with random seed 231 for reproducibility
-
-## 🤖 Models Implemented
-
-### Algorithms Tested:
-1. **Logistic Regression**
-2. **Random Forest Classifier**
-3. **Support Vector Classifier (SVC)**
-4. **K-Nearest Neighbors (KNN)**
-5. **Decision Tree Classifier**
-
-Each model was evaluated with and without **GridSearchCV** hyperparameter tuning.
-
-## 📈 Model Performance
-
-| Model | Accuracy | F1-Score |
+| Model | F1‑Score | Accuracy |
 |-------|----------|----------|
-| KNN with GridSearch | **77.92%** | **65.31%** |
-| Logistic Regression | 77.92% | 63.83% |
-| SVC | 76.62% | 62.50% |
-| KNN (default) | 75.32% | 59.57% |
-| Logistic Regression (GridSearch) | 75.32% | 57.78% |
-| Random Forest | 74.03% | 56.52% |
-| Decision Tree (GridSearch) | 67.53% | 56.14% |
-| Decision Tree | 72.73% | 55.32% |
-| SVC (GridSearch) | 72.73% | 55.32% |
-| Random Forest (GridSearch) | 74.03% | 56.52% |
+| **SVC (default)** | **65.55%** | **73.38%** |
+| KNN (GridSearch)  | 65.57%   | 72.73%   |
+| Random Forest (GridSearch) | 63.64% | 74.03% |
+| Logistic Regression (GridSearch) | 63.16% | 72.73% |
+| Decision Tree | 60.61% | 66.23% |
 
-### Best Model: KNN with GridSearch
-- **F1-Score**: 65.31%
-- **Accuracy**: 77.92%
+> **Note**: GridSearchCV was used for hyperparameter tuning; SVC with default parameters (`C=1`, `kernel='rbf'`, `gamma='scale'`) outperformed its tuned version (which had lower F1).
 
-## 🚀 Pipeline Implementation
+---
 
-A complete preprocessing and modeling pipeline was created using `sklearn.pipeline.Pipeline`:
+## 🔧 Data Preprocessing
 
-1. **Preprocessor**: ColumnTransformer with:
-   - Mean imputation for missing values
-   - KNN imputation for SkinThickness
-   - Passthrough for remaining features
+1. **Handling Missing Values**  
+   - Columns with `0` as missing: `Glucose`, `BloodPressure`, `SkinThickness`, `BMI`.  
+   - **Mean imputation** for `Glucose`, `BloodPressure`, `BMI`.  
+   - **KNN imputation** for `SkinThickness` (due to high missing rate ~42%).
 
-2. **Scaler**: RobustScaler for outlier-resistant scaling
+2. **Outlier Treatment**  
+   - Applied **RobustScaler** to reduce outlier influence.
 
-3. **Classifier**: K-Nearest Neighbors with optimized parameters:
-   - `n_neighbors=11`
-   - `weights='distance'`
-   - `metric='manhattan'`
-   - `p=1`
+3. **Class Imbalance**  
+   - Used **SMOTE** (Synthetic Minority Oversampling) to balance the training set.
 
-## 💾 Model Persistence
+4. **Feature Engineering**  
+   - Created an interaction feature `Glucose_BMI = Glucose × BMI`, though it did not improve performance.
 
-The final model pipeline is saved using **joblib**:
+---
 
-```python
-MODEL_NAME = "diabet-analysis.joblib"
-joblib.dump(pipeline, MODEL_NAME)
+## 📈 Exploratory Data Analysis
+
+- **Feature Importance** (Random Forest):  
+  `Glucose` and `BMI` were the most influential features.
+- **Correlation**: Highest correlation between `Age` and `Pregnancies` (0.54).
+- **Missing Data**: `Insulin` had ~48% missing values, `SkinThickness` ~42%.
+- **Class Distribution**: Imbalanced – ~65% negative, 35% positive.
+
+---
+
+## 🚀 Live Demo
+
+Try the application directly:  
+👉 [Diabetes Prediction Demo](https://huggingface.co/spaces/sirunchained/diabet-analysis)
+
+---
+
+## 📁 Repository Structure
+
+```
+├── main.ipynb          # Full pipeline: EDA, preprocessing, modeling, evaluation
+├── diabetes.csv        # Dataset
+├── requirements.txt    # Python dependencies
+└── README.md           # This file
 ```
 
-### Loading and Testing:
-```python
-pipline_loaded = joblib.load(MODEL_NAME)
-```
-
-## 📊 Evaluation Metrics Used
-
-- **Accuracy**: Overall correct predictions
-- **F1-Score**: Harmonic mean of precision and recall (primary metric)
-- **Confusion Matrix**: Visual representation of predictions
-- **ROC Curve**: Area Under the Curve (AUC) analysis
+---
 
 ## 🔧 Requirements
 
-### Libraries Used:
-- pandas, numpy (data manipulation)
-- matplotlib, seaborn (visualization)
-- scikit-learn (machine learning)
-- imbalanced-learn (SMOTE)
-- joblib (model serialization)
-
-### Key Modules:
-```python
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from imblearn.over_sampling import SMOTE
+```bash
+pip install -r requirements.txt
 ```
 
-## 📝 Key Insights
+Key libraries: `pandas`, `numpy`, `matplotlib`, `seaborn`, `scikit-learn`, `imbalanced-learn`, `joblib`.
 
-1. **Data Quality**: Careful handling of missing values (especially 0 values) is crucial
-2. **Feature Engineering**: Proper scaling and outlier treatment improves model performance
-3. **Class Imbalance**: Addressing imbalance significantly improves F1-score
-4. **Model Selection**: KNN with GridSearchCV outperformed other algorithms
-5. **Pipeline Benefits**: Pipeline ensures reproducibility and prevents data leakage
+---
 
-## 🎓 Lessons Learned
+## 💻 Usage
 
-- Always investigate the meaning of zero values in medical datasets
-- Use appropriate imputation strategies (KNN for high missing rates)
-- Handle class imbalance for improved minority class prediction
-- GridSearchCV helps find optimal hyperparameters
-- Pipeline ensures consistent preprocessing across training and test data
+1. Clone the repository.
+2. Install dependencies.
+3. Run `jupyter notebook main.ipynb` to explore the full analysis.
+4. Or launch the Hugging Face Space for instant predictions.
+
+---
+
+## 📝 Notes
+
+- The notebook includes detailed visualisations (histograms, box plots, correlation heatmap, ROC curves).
+- SMOTE was applied **after** train/test split to avoid data leakage.
+- All models were evaluated using cross‑validation and confusion matrices.
+
+---
+
+## 👨‍💻 Author
+
+**SirUnchained**
+
+---
+
+*This project was developed as a solution for a diabetes prediction task, demonstrating a complete machine learning workflow.*
