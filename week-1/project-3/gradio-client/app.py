@@ -81,12 +81,13 @@ def predict_diabetes(
     probabilities = pipeline.predict_proba(input_data)[0]
 
     # Format output
-    outcome = "Diabetic" if prediction == 1 else "Non-Diabetic"
-    confidence = probabilities[prediction] * 100
+    outcome = (
+        f"Diabetic (Confidence {round(probabilities[1], 4) * 100})"
+        if prediction == 1
+        else f"Non-Diabetic (Confidence {round(probabilities[0], 4) * 100})"
+    )
 
-    return {
-        "Prediction": outcome,
-        "Confidence (%)": round(confidence, 2),
+    return outcome, {
         "Probability (Non-Diabetic)": round(probabilities[0], 4),
         "Probability (Diabetic)": round(probabilities[1], 4),
     }
@@ -117,7 +118,7 @@ iface = gr.Interface(
     examples=[
         [1, 85, 66, 29, 0, 26.6, 0.351, 31],  # Non-diabetic example
         [6, 148, 72, 35, 0, 33.6, 0.627, 50],  # Diabetic example
-        [8, 183, 64, 0, 0, 23.3, 0.672, 32],
+        [9, 171, 110, 24, 240, 45.4, 0.721, 54, 1],
         [0, 137, 40, 35, 168, 43.1, 2.288, 33],
     ],
     theme="default",
