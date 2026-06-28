@@ -1,25 +1,26 @@
 from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
+from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
+
 from configs.config import get_settings
-from langchain.agents import create_agent
 
-from src.gold_agent.tools.get_yfinance_source_tool import get_yfinance_source_tool
-from src.gold_agent.tools.search_tool import get_search_tool
-from prompt.prompt import system_prompt
+from prompts.prompt import system_prompt
+
+from src.tools.yfinance_tool import get_yfinance_source_tool
+from src.tools.search_tool import get_search_tool
 
 
-def build_agent(checkpointer: InMemorySaver):
+def build_gold_agent(checkpointer: InMemorySaver):
     """
-    Builds and returns an agent.
+    Build and return a LangGraph ReAct agent.
 
     Args:
-        checkpointer (InMemorySaver): The memory backend for conversation state.
+        checkpointer: Memory backend for persisting conversation state per thread.
 
     Returns:
-        AgentExecutor: A compiled LangGraph agent ready for `.invoke()` calls.
+        A compiled LangGraph agent ready for `.invoke()` calls.
     """
-
     settings = get_settings()
 
     if settings.LOCAL_MODEL:
@@ -30,17 +31,17 @@ def build_agent(checkpointer: InMemorySaver):
     else:
         llm = ChatGroq(
             model=settings.GROQ_MODEL_NAME,
-            api_key=settings.GROQ_API_KEY,
+            api_key=settings.GROK_API_KEY,
             temperature=settings.TEMPERATURE,
         )
 
-    search_tool = get_search_tool(settings.TAVILY_API_KEY)
+    search_tool = get_search_tool()
 
-    agent = create_agent(
+    agent = create_react_agent(
         model=llm,
         tools=[get_yfinance_source_tool, search_tool],
         checkpointer=checkpointer,
-        system_prompt=system_prompt,
+        prompt=system_prompt,
     )
 
     return agent

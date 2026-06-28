@@ -1,8 +1,8 @@
-# ui/app.py
+# app.py
 import streamlit as st
 from ui.state import initialize_session_state, reset_conversation
-from ui.ui_backend import setup_backend
-from ui.chat_handling import process_user_message
+from ui.backend import setup_backend
+from ui.chat import process_user_message
 from helpers.helpers import plot_gold_prices
 
 # ----- Backend Setup (ETL & proxy) -----
@@ -32,12 +32,10 @@ for message in st.session_state.messages:
 
 # ----- Handle User Input -----
 if prompt := st.chat_input("Enter your message ..."):
-    # Show user message immediately
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Get assistant response
     with st.chat_message("assistant"):
         with st.spinner("Thinking ..."):
             final_answer = process_user_message(
@@ -45,5 +43,4 @@ if prompt := st.chat_input("Enter your message ..."):
             )
         st.markdown(final_answer)
 
-    # Store assistant response
     st.session_state.messages.append({"role": "assistant", "content": final_answer})
