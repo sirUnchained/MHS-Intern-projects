@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
@@ -16,13 +17,18 @@ def plot_gold_prices(data: pd.DataFrame) -> Figure:
         Matplotlib Figure ready for st.pyplot().
     """
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(data["Close"], label="Gold Price (Close)", color="gold")
-    ax.set_title("Gold Price Trend Over Time")
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Price (USD)")
-    ax.legend()
-    ax.grid(True)
-    fig.tight_layout()
+
+    if not data.empty:
+        ax.plot(data["Close"], label="Gold Price (Close)", color="gold")
+        ax.set_title("Gold Price Trend Over Time")
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Price (USD)")
+        ax.legend()
+        ax.grid(True)
+        fig.tight_layout()
+    else:
+        ax.set_title("Failed to fetch data, Nothing to view")
+
     return fig
 
 

@@ -37,8 +37,7 @@ def extract(ticker: str, start_date: str, end_date: str = "today") -> pd.DataFra
             threads=True,
         )
         if data is None or data.empty:
-            logger.warning(f"No data returned for '{ticker}'.")
-            return pd.DataFrame()
+            raise RuntimeError(f"No data returned for '{ticker}'.")
 
         logger.info(f"Downloaded {len(data)} rows for '{ticker}'")
         return data
