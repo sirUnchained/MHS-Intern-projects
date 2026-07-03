@@ -2,3 +2,4 @@ __pycache__
 diabet-analysis.joblib
 bak*
 *.7z
+.env

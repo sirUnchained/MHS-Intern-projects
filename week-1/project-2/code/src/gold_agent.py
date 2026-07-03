@@ -1,5 +1,6 @@
 from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
+
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
 
@@ -31,7 +32,7 @@ def build_gold_agent(checkpointer: InMemorySaver):
     else:
         llm = ChatGroq(
             model=settings.GROQ_MODEL_NAME,
-            api_key=settings.GROK_API_KEY,
+            api_key=settings.GROK_API_KEY,  # type: ignore
             temperature=settings.TEMPERATURE,
         )
 
