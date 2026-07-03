@@ -38,8 +38,10 @@ if prompt := st.chat_input("Enter your message ..."):
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking ..."):
-            final_answer = process_user_message(
-                prompt, st.session_state.thread_id, st.session_state.agent
+            final_answer = st.write_stream(
+                process_user_message(
+                    prompt, st.session_state.thread_id, st.session_state.agent
+                )
             )
         st.markdown(final_answer)
 
