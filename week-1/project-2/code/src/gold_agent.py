@@ -1,7 +1,7 @@
 from langchain_groq import ChatGroq
 from langchain_ollama import ChatOllama
 
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
 from langgraph.checkpoint.memory import InMemorySaver
 
 from configs.config import get_settings
@@ -38,11 +38,11 @@ def build_gold_agent(checkpointer: InMemorySaver):
 
     search_tool = get_search_tool()
 
-    agent = create_react_agent(
+    agent = create_agent(
         model=llm,
         tools=[get_yfinance_source_tool, search_tool],
         checkpointer=checkpointer,
-        prompt=system_prompt,
+        system_prompt=system_prompt,
     )
 
     return agent
