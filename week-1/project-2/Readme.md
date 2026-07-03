@@ -43,7 +43,7 @@ TAVILY_API_KEY = "tvly-..."
 MODEL_NAME = "qwen2.5-1.5b-instruct:latest"
 
 # Groq model name (used when LOCAL_MODEL=False)
-GROQ_MODEL_NAME = "meta-llama/llama-4-scout-17b-16e-instruct"
+GROQ_MODEL_NAME = "openai/gpt-oss-20b"
 
 # Path to the SQLite database file
 DATABASE_PATH = "database/data.db"

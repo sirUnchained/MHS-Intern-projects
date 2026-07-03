@@ -43,6 +43,5 @@ if prompt := st.chat_input("Enter your message ..."):
                     prompt, st.session_state.thread_id, st.session_state.agent
                 )
             )
-        st.markdown(final_answer)
 
     st.session_state.messages.append({"role": "assistant", "content": final_answer})
