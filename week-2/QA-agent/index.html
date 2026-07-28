@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>داشبورد مدیریت دارایی‌ها</title>
+
+    <!-- Bootstrap 5 RTL -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        /* ===== Custom Variables ===== */
+        :root {
+            --primary-dark: #0b0e1a;
+            --primary-card: #141b2d;
+            --primary-border: #2a3457;
+            --accent-gold: #f0b90b;
+            --accent-blue: #4a8cff;
+            --text-light: #e8edf5;
+            --text-muted: #8899bb;
+            --shadow-glow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--primary-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding-top: 70px;
+        }
+
+        /* ===== Scrollbar ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-gold);
+            border-radius: 10px;
+        }
+
+        /* ===== Navbar ===== */
+        .navbar-custom {
+            background: rgba(11, 14, 26, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--primary-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            padding: 12px 0;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1050;
+        }
+
+        .navbar-custom .navbar-brand {
+            color: var(--accent-gold);
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .navbar-custom .navbar-brand i {
+            margin-left: 10px;
+        }
+
+        .navbar-custom .nav-link {
+            color: var(--text-muted) !important;
+            font-weight: 500;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: all 0.25s;
+        }
+
+        .navbar-custom .nav-link:hover,
+        .navbar-custom .nav-link.active {
+            color: #fff !important;
+            background: rgba(74, 140, 255, 0.15);
+        }
+
+        .navbar-custom .nav-link i {
+            margin-left: 8px;
+        }
+
+        .navbar-custom .btn-outline-gold {
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+            border-radius: 8px;
+            padding: 6px 22px;
+            font-weight: 600;
+            transition: all 0.25s;
+            margin: 0 4px;
+        }
+
+        .navbar-custom .btn-outline-gold:hover {
+            background: var(--accent-gold);
+            color: #0b0e1a;
+        }
+
+        .navbar-custom .btn-gold {
+            background: var(--accent-gold);
+            color: #0b0e1a;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 22px;
+            font-weight: 600;
+            transition: all 0.25s;
+            margin: 0 4px;
+        }
+
+        .navbar-custom .btn-gold:hover {
+            background: #d4a30a;
+            color: #0b0e1a;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 6px 16px 6px 20px;
+            border-radius: 30px;
+            border: 1px solid var(--primary-border);
+        }
+
+        .user-badge .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            color: #0b0e1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .user-badge .username {
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .user-badge .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+            padding: 0 4px;
+        }
+
+        .user-badge .logout-btn:hover {
+            color: #ff6b6b;
+        }
+
+        /* ===== Main Content ===== */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 24px 60px;
+        }
+
+        .section-page {
+            display: none;
+            animation: fadeUp 0.4s ease;
+        }
+
+        .section-page.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== Cards ===== */
+        .glass-card {
+            background: var(--primary-card);
+            border: 1px solid var(--primary-border);
+            border-radius: 16px;
+            padding: 24px 22px;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-glow);
+            height: 100%;
+        }
+
+        .glass-card:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+        }
+
+        .glass-card .card-icon {
+            font-size: 2.2rem;
+            color: var(--accent-gold);
+            margin-bottom: 12px;
+        }
+
+        .glass-card .asset-price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .glass-card .asset-change {
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 30px;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        .glass-card .asset-change.positive {
+            background: rgba(0, 230, 118, 0.2);
+            color: #00e676;
+        }
+
+        .glass-card .asset-change.negative {
+            background: rgba(255, 82, 82, 0.2);
+            color: #ff5252;
+        }
+
+        .glass-card .asset-name {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .glass-card .asset-date {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        /* ===== Forms ===== */
+        .auth-form {
+            max-width: 440px;
+            margin: 40px auto;
+            padding: 40px 36px;
+            background: var(--primary-card);
+            border: 1px solid var(--primary-border);
+            border-radius: 20px;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .auth-form .form-title {
+            text-align: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .auth-form .form-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            font-size: 0.95rem;
+        }
+
+        .auth-form .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--primary-border);
+            color: #fff;
+            border-radius: 10px;
+            padding: 12px 18px;
+            transition: all 0.25s;
+        }
+
+        .auth-form .form-control:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 4px rgba(240, 185, 11, 0.15);
+            color: #fff;
+        }
+
+        .auth-form .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .auth-form .btn-submit {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            background: var(--accent-gold);
+            color: #0b0e1a;
+            border: none;
+            transition: all 0.25s;
+        }
+
+        .auth-form .btn-submit:hover {
+            background: #d4a30a;
+            transform: scale(1.01);
+        }
+
+        .auth-form .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-muted);
+        }
+
+        .auth-form .form-footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-form .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== Admin ===== */
+        .admin-upload-area {
+            border: 2px dashed var(--primary-border);
+            border-radius: 16px;
+            padding: 50px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .admin-upload-area:hover {
+            border-color: var(--accent-gold);
+            background: rgba(240, 185, 11, 0.04);
+        }
+
+        .admin-upload-area i {
+            font-size: 3.5rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .admin-upload-area p {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .admin-upload-area .file-name {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .ticket-table {
+            color: var(--text-light);
+        }
+
+        .ticket-table thead th {
+            border-bottom: 1px solid var(--primary-border);
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            padding: 14px 10px;
+        }
+
+        .ticket-table tbody td {
+            border-bottom: 1px solid rgba(42, 52, 87, 0.4);
+            padding: 14px 10px;
+            vertical-align: middle;
+        }
+
+        .ticket-table .badge-status {
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .badge-status.open {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .badge-status.closed {
+            background: rgba(0, 230, 118, 0.2);
+            color: #00e676;
+        }
+
+        .badge-status.pending {
+            background: rgba(74, 140, 255, 0.2);
+            color: #4a8cff;
+        }
+
+        /* ===== Chat ===== */
+        .chat-container {
+            background: var(--primary-card);
+            border: 1px solid var(--primary-border);
+            border-radius: 16px;
+            overflow: hidden;
+            height: 520px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .chat-header {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--primary-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .chat-header .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .chat-header .status .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .chat-header .status .dot.online {
+            background: #00e676;
+            box-shadow: 0 0 12px rgba(0, 230, 118, 0.4);
+        }
+
+        .chat-header .status .dot.offline {
+            background: #ff5252;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .chat-messages .msg {
+            padding: 10px 16px;
+            border-radius: 12px;
+            max-width: 75%;
+            word-wrap: break-word;
+            font-size: 0.95rem;
+            animation: fadeUp 0.25s ease;
+        }
+
+        .chat-messages .msg.self {
+            align-self: flex-end;
+            background: var(--accent-gold);
+            color: #0b0e1a;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-messages .msg.other {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.07);
+            color: var(--text-light);
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-messages .msg .msg-meta {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .chat-messages .system-msg {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 8px 0;
+        }
+
+        .chat-input-area {
+            padding: 14px 22px;
+            border-top: 1px solid var(--primary-border);
+            display: flex;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--primary-border);
+            border-radius: 10px;
+            padding: 10px 18px;
+            color: #fff;
+            transition: all 0.25s;
+        }
+
+        .chat-input-area input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 4px rgba(240, 185, 11, 0.12);
+            color: #fff;
+            outline: none;
+        }
+
+        .chat-input-area input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-input-area button {
+            background: var(--accent-gold);
+            color: #0b0e1a;
+            border: none;
+            border-radius: 10px;
+            padding: 0 24px;
+            font-weight: 700;
+            transition: all 0.25s;
+        }
+
+        .chat-input-area button:hover {
+            background: #d4a30a;
+        }
+
+        .chat-input-area button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ===== Toast / Alerts ===== */
+        .toast-container-custom {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-custom {
+            background: var(--primary-card);
+            border: 1px solid var(--primary-border);
+            border-radius: 12px;
+            padding: 14px 24px;
+            color: #fff;
+            font-weight: 500;
+            box-shadow: var(--shadow-glow);
+            animation: slideUp 0.35s ease;
+            min-width: 260px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .toast-custom.success {
+            border-right: 4px solid #00e676;
+        }
+
+        .toast-custom.error {
+            border-right: 4px solid #ff5252;
+        }
+
+        .toast-custom.info {
+            border-right: 4px solid #4a8cff;
+        }
+
+        .toast-custom .toast-icon {
+            font-size: 1.4rem;
+        }
+
+        .toast-custom .toast-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-right: auto;
+            padding: 0 4px;
+        }
+
+        @keyframes slideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ===== Loading Spinner ===== */
+        .spinner-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 14, 26, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 9998;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner-overlay.show {
+            display: flex;
+        }
+
+        .spinner-overlay .spinner-border {
+            width: 3.5rem;
+            height: 3.5rem;
+            color: var(--accent-gold);
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .navbar-custom .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .navbar-custom .nav-link {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+
+            .auth-form {
+                padding: 28px 20px;
+                margin: 20px 12px;
+            }
+
+            .glass-card .asset-price {
+                font-size: 1.4rem;
+            }
+
+            .chat-container {
+                height: 400px;
+            }
+
+            .main-container {
+                padding: 12px 12px 40px;
+            }
+
+            .user-badge .username {
+                display: none;
+            }
+        }
+
+        /* ===== Misc ===== */
+        .section-title {
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .text-gold {
+            color: var(--accent-gold);
+        }
+
+        .bg-gold-soft {
+            background: rgba(240, 185, 11, 0.08);
+        }
+
+        .border-gold {
+            border-color: var(--accent-gold) !important;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-3 {
+            gap: 1rem;
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .no-data {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 30px 0;
+            font-size: 1rem;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .admin-section {
+            margin-top: 32px;
+        }
+
+        .admin-section:first-of-type {
+            margin-top: 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .mt-4 {
+            margin-top: 1.5rem !important;
+        }
+
+        .mb-3 {
+            margin-bottom: 1rem !important;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem !important;
+        }
+
+        .mb-5 {
+            margin-bottom: 3rem !important;
+        }
+
+        .w-100 {
+            width: 100%;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== Loading Overlay ===== -->
+    <div class="spinner-overlay" id="spinnerOverlay">
+        <div class="spinner-border" role="status"></div>
+    </div>
+
+    <!-- ===== Toast Container ===== -->
+    <div class="toast-container-custom" id="toastContainer"></div>
+
+    <!-- ===== Navbar ===== -->
+    <nav class="navbar navbar-expand-lg navbar-custom" id="mainNavbar">
+        <div class="container-fluid px-3 px-md-4">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line"></i> دارایی‌سنج
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navContent">
+                <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-page="dashboard" href="#"><i class="fas fa-home"></i>داشبورد</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-page="admin" href="#"><i class="fas fa-shield-alt"></i>ادمین</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-page="chat" href="#"><i class="fas fa-comment-dots"></i>چت</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2" id="navAuth">
+                    <!-- shown when logged out -->
+                    <div id="authButtons">
+                        <a class="btn btn-outline-gold" data-page="login" href="#"><i class="fas fa-sign-in-alt"></i>
+                            ورود</a>
+                        <a class="btn btn-gold" data-page="signup" href="#"><i class="fas fa-user-plus"></i> ثبت‌نام</a>
+                    </div>
+                    <!-- shown when logged in -->
+                    <div id="userBadge" class="hidden">
+                        <div class="user-badge">
+                            <span class="avatar" id="userAvatar">U</span>
+                            <span class="username" id="userNameDisplay">کاربر</span>
+                            <button class="logout-btn" id="logoutBtn" title="خروج"><i
+                                    class="fas fa-sign-out-alt"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== Main Content ===== -->
+    <div class="main-container">
+
+        <!-- ===== DASHBOARD ===== -->
+        <div class="section-page active" id="page-dashboard">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <div>
+                    <h2 class="section-title"><i class="fas fa-chart-pie text-gold me-2"></i>داشبورد دارایی‌ها</h2>
+                    <p class="section-subtitle">آخرین قیمت‌ها و تغییرات بازار</p>
+                </div>
+                <button class="btn btn-outline-gold" id="refreshAssetsBtn">
+                    <i class="fas fa-sync-alt"></i> بروزرسانی
+                </button>
+            </div>
+
+            <div class="row g-4" id="assetCards">
+                <!-- cards injected by JS -->
+                <div class="col-12 text-center text-muted py-5">در حال بارگذاری...</div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="glass-card p-4">
+                        <h5 class="text-gold mb-3"><i class="fas fa-info-circle me-2"></i>درباره سامانه</h5>
+                        <p class="text-muted" style="line-height:1.8;">
+                            این داشبورد به‌صورت لحظه‌ای قیمت دارایی‌های مالی شامل <strong>طلای جهانی</strong>،
+                            <strong>نقره</strong>، <strong>نفت</strong>، <strong>شاخص S&P 500</strong> و
+                            <strong>شاخص دلار</strong> را نمایش می‌دهد. همچنین امکان مدیریت تیکت‌ها،
+                            آپلود فایل و چت زنده با پشتیبانی فراهم شده است.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== LOGIN ===== -->
+        <div class="section-page" id="page-login">
+            <div class="auth-form">
+                <h2 class="form-title"><i class="fas fa-sign-in-alt text-gold me-2"></i>ورود</h2>
+                <p class="form-subtitle">برای دسترسی به داشبورد وارد شوید</p>
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">نام کاربری</label>
+                        <input type="text" class="form-control" id="loginUsername"
+                            placeholder="نام کاربری خود را وارد کنید" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">رمز عبور</label>
+                        <input type="password" class="form-control" id="loginPassword" placeholder="رمز عبور"
+                            required />
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-arrow-left me-2"></i>ورود</button>
+                    <div class="form-footer">
+                        حساب کاربری ندارید؟ <a href="#" data-page="signup">ثبت‌نام کنید</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== SIGNUP ===== -->
+        <div class="section-page" id="page-signup">
+            <div class="auth-form">
+                <h2 class="form-title"><i class="fas fa-user-plus text-gold me-2"></i>ثبت‌نام</h2>
+                <p class="form-subtitle">ایجاد حساب کاربری جدید</p>
+                <form id="signupForm">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">نام کاربری</label>
+                        <input type="text" class="form-control" id="signupUsername" placeholder="نام کاربری" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">رمز عبور</label>
+                        <input type="password" class="form-control" id="signupPassword" placeholder="رمز عبور"
+                            required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">تکرار رمز عبور</label>
+                        <input type="password" class="form-control" id="signupPasswordConfirm"
+                            placeholder="تکرار رمز عبور" required />
+                    </div>
+                    <button type="submit" class="btn-submit"><i class="fas fa-user-check me-2"></i>ثبت‌نام</button>
+                    <div class="form-footer">
+                        قبلاً ثبت‌نام کرده‌اید؟ <a href="#" data-page="login">وارد شوید</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== ADMIN ===== -->
+        <div class="section-page" id="page-admin">
+            <h2 class="section-title"><i class="fas fa-shield-alt text-gold me-2"></i>پنل مدیریت</h2>
+            <p class="section-subtitle">آپلود فایل و مدیریت تیکت‌ها</p>
+
+            <!-- Upload -->
+            <div class="admin-section">
+                <div class="glass-card">
+                    <h5 class="text-gold mb-3"><i class="fas fa-upload me-2"></i>آپلود فایل</h5>
+                    <form id="uploadForm">
+                        <div class="admin-upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>برای آپلود، فایل را اینجا بکشید یا کلیک کنید</p>
+                            <p class="file-name" id="selectedFileName">هیچ فایلی انتخاب نشده</p>
+                            <input type="file" name="file" id="fileInput" style="display:none;" accept="*/*" />
+                        </div>
+                        <button type="submit" class="btn btn-gold mt-3 w-100" id="uploadBtn">
+                            <i class="fas fa-upload me-2"></i>آپلود فایل
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tickets -->
+            <div class="admin-section">
+                <div class="glass-card">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+                        <h5 class="text-gold mb-0"><i class="fas fa-ticket-alt me-2"></i>تیکت‌ها</h5>
+                        <button class="btn btn-outline-gold btn-sm" id="refreshTicketsBtn">
+                            <i class="fas fa-sync-alt"></i> بروزرسانی
+                        </button>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="table ticket-table" id="ticketsTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>عنوان</th>
+                                    <th>وضعیت</th>
+                                    <th>تاریخ</th>
+                                    <th>کاربر</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ticketsBody">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">در حال بارگذاری...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CHAT ===== -->
+        <div class="section-page" id="page-chat">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <div>
+                    <h2 class="section-title"><i class="fas fa-comment-dots text-gold me-2"></i>چت زنده</h2>
+                    <p class="section-subtitle">ارتباط با پشتیبانی و سایر کاربران</p>
+                </div>
+                <span id="chatStatusBadge" class="badge bg-secondary px-3 py-2">
+                    <i class="fas fa-circle" style="font-size:0.6rem;color:#ff5252;"></i> قطع
+                </span>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div>
+                        <i class="fas fa-users text-gold me-2"></i>
+                        <span>گفتگوی گروهی</span>
+                    </div>
+                    <div class="status">
+                        <span class="dot offline" id="chatDot"></span>
+                        <span id="chatStatusText">اتصال...</span>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="system-msg">به چت خوش آمدید! منتظر پیام‌ها باشید...</div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" placeholder="پیام خود را بنویسید..." disabled />
+                    <button id="chatSendBtn" disabled><i class="fas fa-paper-plane"></i> ارسال</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== Bootstrap JS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+    <!-- ============================================================
+    MAIN APPLICATION – ALL IMPROVEMENTS INCLUDED
+    ============================================================ -->
+    <script>
+        (function () {
+            'use strict';
+
+            // ============================================================
+            //  CONFIG
+            // ============================================================
+            const BASE_URL = 'http://127.0.0.1:8000';
+            const WS_URL = 'ws://127.0.0.1:8000/ws/chat';
+
+            const ASSETS = {
+                dxy: 'DX-Y.NYB',
+                gold: 'GC=F',
+                silver: 'SI=F',
+                oil: 'CL=F',
+                sp500: '^GSPC'
+            };
+
+            const ASSET_LABELS = {
+                dxy: 'شاخص دلار',
+                gold: 'طلای جهانی',
+                silver: 'نقره',
+                oil: 'نفت WTI',
+                sp500: 'S&P 500'
+            };
+
+            const ASSET_ICONS = {
+                dxy: 'fa-dollar-sign',
+                gold: 'fa-coins',
+                silver: 'fa-gem',
+                oil: 'fa-oil-can',
+                sp500: 'fa-chart-bar'
+            };
+
+            // ============================================================
+            //  STATE
+            // ============================================================
+            let currentUser = null;
+            let ws = null;
+            let wsConnected = false;
+            let chatReconnectTimer = null;
+            let assetRefreshInterval = null;
+
+            // ---- Message buffering for streaming responses ----
+            const messageBuffer = {}; // key: sender, value: { text, timer, container, isSelf }
+            const displayedSelfMessages = new Set(); // stores ids of self messages already shown
+
+            // ============================================================
+            //  DOM REFS
+            // ============================================================
+            const $ = (sel) => document.querySelector(sel);
+            const $$ = (sel) => document.querySelectorAll(sel);
+
+            const pages = {
+                dashboard: $('#page-dashboard'),
+                login: $('#page-login'),
+                signup: $('#page-signup'),
+                admin: $('#page-admin'),
+                chat: $('#page-chat'),
+            };
+
+            const navLinks = $$('.navbar-custom .nav-link[data-page]');
+            const authNavLinks = $$('#navAuth a[data-page]');
+            const authButtons = $('#authButtons');
+            const userBadge = $('#userBadge');
+            const userNameDisplay = $('#userNameDisplay');
+            const userAvatar = $('#userAvatar');
+            const logoutBtn = $('#logoutBtn');
+
+            const assetContainer = $('#assetCards');
+            const refreshAssetsBtn = $('#refreshAssetsBtn');
+
+            const loginForm = $('#loginForm');
+            const loginUsername = $('#loginUsername');
+            const loginPassword = $('#loginPassword');
+
+            const signupForm = $('#signupForm');
+            const signupUsername = $('#signupUsername');
+            const signupPassword = $('#signupPassword');
+            const signupPasswordConfirm = $('#signupPasswordConfirm');
+
+            const uploadForm = $('#uploadForm');
+            const fileInput = $('#fileInput');
+            const uploadArea = $('#uploadArea');
+            const selectedFileName = $('#selectedFileName');
+            const uploadBtn = $('#uploadBtn');
+
+            const ticketsBody = $('#ticketsBody');
+            const refreshTicketsBtn = $('#refreshTicketsBtn');
+
+            const chatMessages = $('#chatMessages');
+            const chatInput = $('#chatInput');
+            const chatSendBtn = $('#chatSendBtn');
+            const chatStatusBadge = $('#chatStatusBadge');
+            const chatDot = $('#chatDot');
+            const chatStatusText = $('#chatStatusText');
+
+            const spinner = $('#spinnerOverlay');
+            const toastContainer = $('#toastContainer');
+
+            // ============================================================
+            //  TOAST / NOTIFICATION
+            // ============================================================
+            function showToast(message, type = 'info', duration = 4000) {
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-circle',
+                    info: 'fa-info-circle',
+                };
+                const el = document.createElement('div');
+                el.className = `toast-custom ${type}`;
+                el.innerHTML = `
+                    <span class="toast-icon"><i class="fas ${icons[type] || icons.info}"></i></span>
+                    <span>${message}</span>
+                    <button class="toast-close">&times;</button>
+                `;
+                el.querySelector('.toast-close').addEventListener('click', () => el.remove());
+                toastContainer.prepend(el);
+                setTimeout(() => { if (el.parentNode) el.remove(); }, duration);
+            }
+
+            // ============================================================
+            //  LOADING SPINNER
+            // ============================================================
+            function showSpinner(show) {
+                spinner.classList.toggle('show', show);
+            }
+
+            // ============================================================
+            //  NAVIGATION
+            // ============================================================
+            function navigateTo(pageId) {
+                Object.values(pages).forEach(p => p.classList.remove('active'));
+                const target = pages[pageId];
+                if (target) target.classList.add('active');
+
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.dataset.page === pageId);
+                });
+
+                if (pageId === 'admin' && currentUser) {
+                    // load tickets immediately when admin page is shown
+                    loadTickets();
+                }
+
+                if (pageId === 'chat') {
+                    connectWebSocket();
+                }
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = link.dataset.page;
+                    if (page === 'admin' && !currentUser) {
+                        showToast('لطفاً ابتدا وارد شوید.', 'error');
+                        navigateTo('login');
+                        return;
+                    }
+                    if ((page === 'login' || page === 'signup') && currentUser) {
+                        showToast('شما قبلاً وارد شده‌اید.', 'info');
+                        return;
+                    }
+                    navigateTo(page);
+                });
+            });
+
+            authNavLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = link.dataset.page;
+                    if (page === 'login' && currentUser) {
+                        showToast('شما قبلاً وارد شده‌اید.', 'info');
+                        return;
+                    }
+                    if (page === 'signup' && currentUser) {
+                        showToast('شما قبلاً وارد شده‌اید.', 'info');
+                        return;
+                    }
+                    navigateTo(page);
+                });
+            });
+
+            // ============================================================
+            //  AUTH STATE
+            // ============================================================
+            function updateAuthUI() {
+                if (currentUser) {
+                    authButtons.classList.add('hidden');
+                    userBadge.classList.remove('hidden');
+                    userNameDisplay.textContent = currentUser.username;
+                    userAvatar.textContent = currentUser.username.charAt(0).toUpperCase();
+                    const adminLink = document.querySelector('.nav-link[data-page="admin"]');
+                    if (adminLink) {
+                        adminLink.style.display = currentUser.isAdmin ? '' : 'none';
+                    }
+                } else {
+                    authButtons.classList.remove('hidden');
+                    userBadge.classList.add('hidden');
+                    const adminLink = document.querySelector('.nav-link[data-page="admin"]');
+                    if (adminLink) adminLink.style.display = 'none';
+                    const activePage = document.querySelector('.section-page.active');
+                    if (activePage) {
+                        const id = activePage.id.replace('page-', '');
+                        if (id === 'admin' || id === 'chat') {
+                            navigateTo('dashboard');
+                        }
+                    }
+                }
+            }
+
+            // ============================================================
+            //  API HELPERS
+            // ============================================================
+            async function apiFetch(endpoint, options = {}) {
+                const url = `${BASE_URL}${endpoint}`;
+                const headers = {
+                    'Accept': 'application/json',
+                    ...(options.headers || {}),
+                };
+                const token = localStorage.getItem('token');
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                if (options.body && !(options.body instanceof FormData) && !options._skipJson) {
+                    headers['Content-Type'] = 'application/json';
+                }
+                const resp = await fetch(url, {
+                    ...options,
+                    headers,
+                });
+                const contentType = resp.headers.get('content-type') || '';
+                let data;
+                if (contentType.includes('application/json')) {
+                    data = await resp.json();
+                } else {
+                    data = await resp.text();
+                }
+                if (!resp.ok) {
+                    const errMsg = typeof data === 'object' && data.message ? data.message : data || 'خطا در ارتباط با سرور';
+                    throw new Error(errMsg);
+                }
+                return data;
+            }
+
+            // ============================================================
+            //  AUTH
+            // ============================================================
+            async function handleLogin(e) {
+                e.preventDefault();
+                const username = loginUsername.value.trim();
+                const password = loginPassword.value.trim();
+                if (!username || !password) {
+                    showToast('لطفاً همه فیلدها را پر کنید.', 'error');
+                    return;
+                }
+                showSpinner(true);
+                try {
+                    const params = new URLSearchParams({ username, password });
+                    const data = await apiFetch('/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params,
+                        _skipJson: true,
+                    });
+                    const token = data.token || data.access_token;
+                    const user = data.user || { username, isAdmin: data.isAdmin || false };
+                    if (token) localStorage.setItem('token', token);
+                    currentUser = user;
+                    updateAuthUI();
+                    showToast(`خوش آمدید ${user.username}!`, 'success');
+                    navigateTo('dashboard');
+                    loginForm.reset();
+                    loadAssets();
+                } catch (err) {
+                    showToast(err.message || 'ورود ناموفق بود.', 'error');
+                } finally {
+                    showSpinner(false);
+                }
+            }
+
+            async function handleSignup(e) {
+                e.preventDefault();
+                const username = signupUsername.value.trim();
+                const password = signupPassword.value.trim();
+                const confirm = signupPasswordConfirm.value.trim();
+                if (!username || !password || !confirm) {
+                    showToast('لطفاً همه فیلدها را پر کنید.', 'error');
+                    return;
+                }
+                if (password !== confirm) {
+                    showToast('رمز عبور و تکرار آن مطابقت ندارند.', 'error');
+                    return;
+                }
+                if (password.length < 4) {
+                    showToast('رمز عبور باید حداقل ۴ کاراکتر باشد.', 'error');
+                    return;
+                }
+                showSpinner(true);
+                try {
+                    await apiFetch('/auth/signup', {
+                        method: 'POST',
+                        body: JSON.stringify({ username, password }),
+                    });
+                    showToast('ثبت‌نام با موفقیت انجام شد. حالا وارد شوید.', 'success');
+                    signupForm.reset();
+                    navigateTo('login');
+                } catch (err) {
+                    showToast(err.message || 'ثبت‌نام ناموفق بود.', 'error');
+                } finally {
+                    showSpinner(false);
+                }
+            }
+
+            function handleLogout() {
+                localStorage.removeItem('token');
+                currentUser = null;
+                if (ws) {
+                    try { ws.close(); } catch (_) { }
+                    ws = null;
+                    wsConnected = false;
+                }
+                updateAuthUI();
+                showToast('شما خارج شدید.', 'info');
+                navigateTo('dashboard');
+                loadAssets();
+            }
+
+            // ============================================================
+            //  ASSETS
+            // ============================================================
+            async function loadAssets() {
+                const container = assetContainer;
+                container.innerHTML =
+                    `<div class="col-12 text-center text-muted py-5"><i class="fas fa-spinner fa-spin me-2"></i>در حال بارگذاری...</div>`;
+
+                const entries = Object.entries(ASSETS);
+                const results = [];
+
+                for (const [key, symbol] of entries) {
+                    try {
+                        const data = await apiFetch(`/data/${key}`);
+                        let price = null;
+                        let change = 0;
+                        let latestDate = null;
+
+                        if (Array.isArray(data) && data.length > 0) {
+                            const latest = data[data.length - 1];
+                            const previous = data.length > 1 ? data[data.length - 2] : null;
+
+                            const latestClose = latest.adj_close ?? latest.close ?? latest.price;
+                            if (typeof latestClose === 'number') {
+                                price = latestClose;
+                            } else if (typeof latestClose === 'string') {
+                                price = parseFloat(latestClose);
+                            }
+
+                            latestDate = latest.date || latest.timestamp || null;
+
+                            if (previous) {
+                                const prevClose = previous.adj_close ?? previous.close ?? previous.price;
+                                let prevVal = (typeof prevClose === 'number') ? prevClose : parseFloat(prevClose);
+                                if (typeof price === 'number' && typeof prevVal === 'number' && prevVal !== 0) {
+                                    change = ((price - prevVal) / prevVal) * 100;
+                                }
+                            }
+                        } else if (data && typeof data === 'object' && !Array.isArray(data)) {
+                            const val = data.price ?? data.close ?? data.value ?? data;
+                            if (typeof val === 'number') price = val;
+                            else if (typeof val === 'string') price = parseFloat(val);
+                            change = data.change ?? data.changePercent ?? 0;
+                            if (typeof change === 'string') change = parseFloat(change) || 0;
+                            latestDate = data.date || data.timestamp || null;
+                        }
+
+                        if (typeof price !== 'number' || isNaN(price)) price = null;
+                        if (typeof change !== 'number' || isNaN(change)) change = 0;
+
+                        results.push({
+                            key,
+                            symbol,
+                            label: ASSET_LABELS[key],
+                            price,
+                            change,
+                            icon: ASSET_ICONS[key],
+                            date: latestDate,
+                            error: null
+                        });
+                    } catch (err) {
+                        results.push({
+                            key,
+                            symbol,
+                            label: ASSET_LABELS[key],
+                            price: null,
+                            change: 0,
+                            icon: ASSET_ICONS[key],
+                            date: null,
+                            error: err.message
+                        });
+                    }
+                }
+
+                container.innerHTML = '';
+                results.forEach(item => {
+                    const col = document.createElement('div');
+                    col.className = 'col-12 col-sm-6 col-xl-4 col-xxl-3';
+                    const changeClass = item.price !== null ? (item.change >= 0 ? 'positive' : 'negative') : '';
+                    const changeText = item.price !== null ?
+                        `${item.change >= 0 ? '+' : ''}${item.change.toFixed(2)}%` :
+                        '—';
+                    const priceText = item.price !== null ?
+                        item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) :
+                        '---';
+                    const dateText = item.date ? new Date(item.date).toLocaleDateString('fa-IR') : '';
+
+                    col.innerHTML = `
+                        <div class="glass-card">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="asset-name"><i class="fas ${item.icon} me-1"></i>${item.label}</div>
+                                    <div class="asset-price">${priceText}</div>
+                                    ${dateText ? `<div class="asset-date">${dateText}</div>` : ''}
+                                </div>
+                                <span class="asset-change ${changeClass}">${changeText}</span>
+                            </div>
+                            <div class="mt-2 text-muted small">${item.symbol}</div>
+                            ${item.error ? `<div class="text-danger small mt-2">${item.error}</div>` : ''}
+                        </div>
+                    `;
+                    container.appendChild(col);
+                });
+
+                if (results.every(r => r.price === null && !r.error)) {
+                    container.innerHTML =
+                        `<div class="col-12 text-center text-muted py-5">امکان دریافت داده‌ها وجود ندارد. مطمئن شوید سرور در حال اجراست.</div>`;
+                }
+            }
+
+            // ============================================================
+            //  ADMIN: UPLOAD
+            // ============================================================
+            function setupUpload() {
+                uploadArea.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', () => {
+                    if (fileInput.files.length > 0) {
+                        selectedFileName.textContent = fileInput.files[0].name;
+                    } else {
+                        selectedFileName.textContent = 'هیچ فایلی انتخاب نشده';
+                    }
+                });
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.style.borderColor = '#f0b90b';
+                    uploadArea.style.background = 'rgba(240,185,11,0.06)';
+                });
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.style.borderColor = '';
+                    uploadArea.style.background = '';
+                });
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.style.borderColor = '';
+                    uploadArea.style.background = '';
+                    if (e.dataTransfer.files.length > 0) {
+                        fileInput.files = e.dataTransfer.files;
+                        selectedFileName.textContent = fileInput.files[0].name;
+                    }
+                });
+
+                uploadForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (!currentUser) {
+                        showToast('لطفاً ابتدا وارد شوید.', 'error');
+                        return;
+                    }
+                    if (fileInput.files.length === 0) {
+                        showToast('لطفاً یک فایل انتخاب کنید.', 'error');
+                        return;
+                    }
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    showSpinner(true);
+                    try {
+                        await apiFetch('/admin/upload-file', {
+                            method: 'POST',
+                            body: formData,
+                        });
+                        showToast('فایل با موفقیت آپلود شد!', 'success');
+                        fileInput.value = '';
+                        selectedFileName.textContent = 'هیچ فایلی انتخاب نشده';
+                    } catch (err) {
+                        showToast(err.message || 'آپلود ناموفق بود.', 'error');
+                    } finally {
+                        showSpinner(false);
+                    }
+                });
+            }
+
+            // ============================================================
+            //  ADMIN: TICKETS  (WITH VERBOSE LOGGING & MOCK DATA)
+            // ============================================================
+            async function loadTickets() {
+                console.log('🚀 loadTickets() called');
+
+                // 1. Check user
+                console.log('👤 currentUser:', currentUser);
+                if (!currentUser) {
+                    console.warn('❌ No user logged in');
+                    ticketsBody.innerHTML =
+                        `<tr><td colspan="5" class="text-center text-muted">برای مشاهده تیکت‌ها وارد شوید.</td></tr>`;
+                    return;
+                }
+
+                // 2. Check DOM element
+                console.log('📌 ticketsBody element:', ticketsBody);
+                if (!ticketsBody) {
+                    console.error('💥 ticketsBody is null! Check the ID.');
+                    return;
+                }
+
+                ticketsBody.innerHTML =
+                    `<tr><td colspan="5" class="text-center text-muted"><i class="fas fa-spinner fa-spin me-2"></i>در حال بارگذاری...</td></tr>`;
+
+                // 3. MOCK DATA – replace this with real API call when backend is ready
+                const data = [
+                    { id: 1, title: 'Test ticket 1', status: 'open', created_at: '2026-07-28', user: 'admin' },
+                    { id: 2, title: 'Test ticket 2', status: 'closed', created_at: '2026-07-27', user: 'alice' }
+                ];
+                console.log('📦 Using mock data:', data);
+
+                try {
+                    // 4. (Uncomment when backend is ready)
+                    // const data = await apiFetch('/admin/ticket');
+                    // console.log('📦 Raw response:', data);
+
+                    // 5. Extract tickets array
+                    let tickets = [];
+                    if (Array.isArray(data)) {
+                        tickets = data;
+                    } else if (data.tickets && Array.isArray(data.tickets)) {
+                        tickets = data.tickets;
+                    } else if (data.data && Array.isArray(data.data)) {
+                        tickets = data.data;
+                    } else if (data.items && Array.isArray(data.items)) {
+                        tickets = data.items;
+                    } else {
+                        // fallback: try to extract any array-like object
+                        const possibleArray = Object.values(data).filter(v => typeof v === 'object' && v !== null);
+                        if (possibleArray.length > 0 && possibleArray.every(v => typeof v === 'object')) {
+                            tickets = possibleArray;
+                        } else {
+                            tickets = [];
+                        }
+                    }
+
+                    console.log(`✅ Found ${tickets.length} tickets:`, tickets);
+
+                    if (tickets.length === 0) {
+                        ticketsBody.innerHTML =
+                            `<tr><td colspan="5" class="text-center text-muted">هیچ تیکتی وجود ندارد.</td></tr>`;
+                        console.log('ℹ️ No tickets to display.');
+                        return;
+                    }
+
+                    // 6. Render tickets
+                    ticketsBody.innerHTML = '';
+                    tickets.forEach((t, idx) => {
+                        const tr = document.createElement('tr');
+                        const status = (t.status || 'open').toLowerCase();
+                        const statusMap = {
+                            open: 'باز',
+                            closed: 'بسته',
+                            pending: 'در انتظار',
+                        };
+                        tr.innerHTML = `
+                            <td>${idx + 1}</td>
+                            <td>${t.title || t.subject || t.ticket_title || 'بدون عنوان'}</td>
+                            <td><span class="badge-status ${status}">${statusMap[status] || status}</span></td>
+                            <td>${t.created_at || t.date || t.timestamp || '—'}</td>
+                            <td>${t.user || t.username || t.creator || '—'}</td>
+                        `;
+                        ticketsBody.appendChild(tr);
+                    });
+                    console.log('✅ Tickets rendered successfully!');
+                } catch (err) {
+                    console.error('❌ Error in loadTickets:', err);
+                    ticketsBody.innerHTML =
+                        `<tr><td colspan="5" class="text-center text-danger">خطا: ${err.message || 'بارگذاری ناموفق'}</td></tr>`;
+                    showToast('خطا در دریافت تیکت‌ها: ' + err.message, 'error');
+                }
+            }
+
+            // ============================================================
+            //  CHAT – with buffering and optimistic self messages
+            // ============================================================
+            function setChatStatus(connected, statusText) {
+                if (connected) {
+                    chatDot.className = 'dot online';
+                    chatStatusText.textContent = statusText || 'آنلاین';
+                    chatStatusBadge.className = 'badge bg-success px-3 py-2';
+                    chatStatusBadge.innerHTML = `<i class="fas fa-circle" style="font-size:0.6rem;color:#fff;"></i> آنلاین`;
+                } else {
+                    chatDot.className = 'dot offline';
+                    chatStatusText.textContent = statusText || 'قطع';
+                    chatStatusBadge.className = 'badge bg-secondary px-3 py-2';
+                    chatStatusBadge.innerHTML = `<i class="fas fa-circle" style="font-size:0.6rem;color:#ff5252;"></i> قطع`;
+                }
+            }
+
+            function addChatMessage(text, sender, isSelf, msgId = null) {
+                const div = document.createElement('div');
+                div.className = `msg ${isSelf ? 'self' : 'other'}`;
+                if (msgId) div.dataset.msgId = msgId;
+                div.dataset.sender = sender;
+                const time = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+                div.innerHTML = `
+                    <div>${text}</div>
+                    <span class="msg-meta">${sender} • ${time}</span>
+                `;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                return div;
+            }
+
+            function addSystemMessage(text) {
+                const div = document.createElement('div');
+                div.className = 'system-msg';
+                div.textContent = text;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // ---- Buffering functions ----
+            function flushBuffer(sender) {
+                const entry = messageBuffer[sender];
+                if (!entry) return;
+                delete messageBuffer[sender];
+
+                const finalText = entry.text.trim();
+                if (!finalText) return;
+
+                if (entry.container) {
+                    const contentDiv = entry.container.querySelector('div');
+                    if (contentDiv) contentDiv.textContent = finalText;
+                    const meta = entry.container.querySelector('.msg-meta');
+                    if (meta) {
+                        const time = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+                        meta.textContent = `${sender} • ${time}`;
+                    }
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                } else {
+                    addChatMessage(finalText, sender, entry.isSelf);
+                }
+            }
+
+            function bufferMessage(sender, text, isSelf) {
+                if (messageBuffer[sender]) {
+                    const entry = messageBuffer[sender];
+                    entry.text += text;
+                    clearTimeout(entry.timer);
+
+                    if (entry.container) {
+                        const contentDiv = entry.container.querySelector('div');
+                        if (contentDiv) contentDiv.textContent = entry.text;
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+
+                    entry.timer = setTimeout(() => {
+                        flushBuffer(sender);
+                    }, 300);
+                    return;
+                }
+
+                // First message from this sender
+                const container = addChatMessage(text, sender, isSelf);
+                const entry = {
+                    text: text,
+                    timer: setTimeout(() => { flushBuffer(sender); }, 300),
+                    container: container,
+                    isSelf: isSelf,
+                };
+                messageBuffer[sender] = entry;
+            }
+
+            // ---- WebSocket ----
+            function connectWebSocket() {
+                if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
+                    return;
+                }
+                if (!currentUser) {
+                    chatMessages.innerHTML =
+                        `<div class="system-msg">لطفاً ابتدا وارد شوید تا بتوانید در چت شرکت کنید.</div>`;
+                    chatInput.disabled = true;
+                    chatSendBtn.disabled = true;
+                    setChatStatus(false);
+                    return;
+                }
+
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showToast('نشست معتبر نیست. لطفاً دوباره وارد شوید.', 'error');
+                    return;
+                }
+
+                setChatStatus(false, 'در حال اتصال...');
+                try {
+                    const wsUrl = `${WS_URL}?token=${encodeURIComponent(token)}`;
+                    ws = new WebSocket(wsUrl);
+
+                    ws.onopen = () => {
+                        wsConnected = true;
+                        setChatStatus(true);
+                        chatInput.disabled = false;
+                        chatSendBtn.disabled = false;
+                        chatInput.placeholder = 'پیام خود را بنویسید...';
+                        addSystemMessage('به چت متصل شدید!');
+                        if (chatReconnectTimer) {
+                            clearTimeout(chatReconnectTimer);
+                            chatReconnectTimer = null;
+                        }
+                    };
+
+                    ws.onmessage = (event) => {
+                        let data;
+                        try { data = JSON.parse(event.data); } catch (_) { data = { message: event.data }; }
+
+                        const text = data.message || data.text || data.content || event.data;
+                        const sender = data.username || data.sender || 'کاربر';
+                        const isSelf = sender === currentUser?.username;
+                        const msgId = data.id || data.msgId || null;
+
+                        // If this is a self message that we already displayed optimistically, skip it
+                        if (isSelf && msgId && displayedSelfMessages.has(msgId)) {
+                            displayedSelfMessages.delete(msgId); // clean up
+                            return;
+                        }
+
+                        // Buffer all incoming messages (including self if not displayed)
+                        bufferMessage(sender, text, isSelf);
+                    };
+
+                    ws.onclose = () => {
+                        wsConnected = false;
+                        setChatStatus(false);
+                        chatInput.disabled = true;
+                        chatSendBtn.disabled = true;
+                        addSystemMessage('اتصال قطع شد. تلاش برای اتصال مجدد...');
+                        if (chatReconnectTimer) clearTimeout(chatReconnectTimer);
+                        chatReconnectTimer = setTimeout(() => {
+                            if (currentUser) connectWebSocket();
+                        }, 3000);
+                    };
+
+                    ws.onerror = () => {
+                        // will trigger onclose
+                    };
+                } catch (err) {
+                    setChatStatus(false);
+                    addSystemMessage('خطا در اتصال به سرور چت.');
+                    chatInput.disabled = true;
+                    chatSendBtn.disabled = true;
+                }
+            }
+
+            function sendChatMessage() {
+                const text = chatInput.value.trim();
+                if (!text || !ws || ws.readyState !== WebSocket.OPEN) {
+                    if (!currentUser) showToast('لطفاً وارد شوید.', 'error');
+                    else showToast('اتصال به سرور برقرار نیست.', 'error');
+                    return;
+                }
+
+                // Generate a unique ID for this message
+                const msgId = `msg-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+
+                // Display optimistically
+                addChatMessage(text, currentUser.username, true, msgId);
+                displayedSelfMessages.add(msgId);
+
+                // Send via WebSocket
+                const payload = JSON.stringify({
+                    message: text,
+                    username: currentUser.username,
+                    timestamp: new Date().toISOString(),
+                    id: msgId, // include the ID so server can echo it back
+                });
+                ws.send(payload);
+
+                chatInput.value = '';
+                chatInput.focus();
+            }
+
+            // ============================================================
+            //  INIT
+            // ============================================================
+            function init() {
+                // auto-login
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const storedUser = localStorage.getItem('user');
+                    if (storedUser) {
+                        try {
+                            currentUser = JSON.parse(storedUser);
+                        } catch (_) { currentUser = null; }
+                    }
+                    if (currentUser) {
+                        updateAuthUI();
+                    } else {
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('user');
+                        currentUser = null;
+                        updateAuthUI();
+                    }
+                } else {
+                    currentUser = null;
+                    updateAuthUI();
+                }
+
+                // event listeners
+                loginForm.addEventListener('submit', handleLogin);
+                signupForm.addEventListener('submit', handleSignup);
+                logoutBtn.addEventListener('click', handleLogout);
+                refreshAssetsBtn.addEventListener('click', loadAssets);
+                refreshTicketsBtn.addEventListener('click', loadTickets);
+
+                chatSendBtn.addEventListener('click', sendChatMessage);
+                chatInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') sendChatMessage();
+                });
+
+                setupUpload();
+
+                loadAssets();
+
+                if (currentUser) {
+                    // If user is admin, load tickets now (but also when navigating)
+                    if (currentUser.isAdmin) {
+                        // loadTickets will be called when admin page is shown,
+                        // but we can preload in background
+                        loadTickets();
+                    }
+                    // If chat page is active, connect
+                    if (document.querySelector('#page-chat.active')) {
+                        connectWebSocket();
+                    }
+                }
+
+                assetRefreshInterval = setInterval(loadAssets, 60000);
+
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        const chatActive = document.querySelector('#page-chat.active');
+                        if (chatActive && currentUser) {
+                            connectWebSocket();
+                        }
+                    }
+                });
+
+                window.addEventListener('beforeunload', () => {
+                    if (ws) try { ws.close(); } catch (_) { }
+                    if (assetRefreshInterval) clearInterval(assetRefreshInterval);
+                });
+
+                // Keep currentUser in sync with localStorage
+                Object.defineProperty(window, 'currentUser', {
+                    get: () => currentUser,
+                    set: (val) => {
+                        currentUser = val;
+                        if (val) {
+                            localStorage.setItem('user', JSON.stringify(val));
+                        } else {
+                            localStorage.removeItem('user');
+                        }
+                        updateAuthUI();
+                    },
+                    configurable: true,
+                });
+
+                const activePage = document.querySelector('.section-page.active');
+                if (!activePage) navigateTo('dashboard');
+
+                console.log('🚀 دارایی‌سنج آماده است!');
+            }
+
+            window.currentUser = currentUser;
+            document.addEventListener('DOMContentLoaded', init);
+
+        })();
+    </script>
+
+</body>
+
+</html>

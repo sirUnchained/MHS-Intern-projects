@@ -35,6 +35,8 @@ class Settings:
     USE_PROXY: bool = os.getenv("USE_PROXY", "false").lower() == "true"
     PROXY_LINK: str = os.getenv("PROXY_LINK")
 
+    JWT_SECRET: str = os.getenv("JWT_SECRET")
+
 
 _settings = None
 

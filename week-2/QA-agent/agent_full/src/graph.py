@@ -2,12 +2,12 @@ from langchain_groq import ChatGroq
 from langchain_ollama.embeddings import OllamaEmbeddings
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
-import psycopg
 from psycopg.rows import dict_row
-from langgraph.store.postgres import PostgresStore
-from langgraph.checkpoint.postgres import PostgresSaver
 from langchain_ollama.embeddings import OllamaEmbeddings
-from psycopg_pool import ConnectionPool
+
+from langgraph.store.postgres.aio import AsyncPostgresStore
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from psycopg_pool import AsyncConnectionPool
 
 from config import get_settings
 from src.state import SupportState
@@ -31,7 +31,7 @@ from src.tools.search_tool import get_search_tool
 from src.tools.financial_data_tool import get_financial_data_tool
 
 
-def build_graph():
+async def build_graph():
     settings = get_settings()
 
     # Setup LLMs and graph
@@ -128,41 +128,37 @@ def build_graph():
     graph_builder.add_edge("extract_data_after_agent_node", END)
 
     # Build and return graph
-    store, checkpointer = setup_memory()
+    store, checkpointer = await setup_memory()
     return graph_builder.compile(checkpointer=checkpointer, store=store)
 
 
-def setup_memory():
+async def setup_memory():
     settings = get_settings()
 
     embedding_model = OllamaEmbeddings(model=settings.OLLAMA_EMBEDDING_MODEL_NAME)
-    EMBED_DIMS = len(embedding_model.embed_query("dimension probe"))
+    EMBED_DIMS = len(await embedding_model.aembed_query("dimension probe"))
+
+    # --- Shared async connection pool (used by both store and checkpointer) ---
+    pool = AsyncConnectionPool(
+        conninfo=settings.POSTGRESQL_DATABASE_LINK,
+        kwargs={"autocommit": True, "row_factory": dict_row},
+        max_size=20,
+        open=False,
+    )
+    await pool.open()
 
     # --- Long-term memory ---
-    store_conn = psycopg.connect(
-        conninfo=settings.POSTGRESQL_DATABASE_LINK,
-        autocommit=True,
-        row_factory=dict_row,
-    )
-    store = PostgresStore(
-        conn=store_conn,
+    store = AsyncPostgresStore(
+        pool,
         index={
             "embed": embedding_model,
             "dims": EMBED_DIMS,
         },
     )
-    store.setup()
-
-    # --- Shared connection pool ---
-    pool = ConnectionPool(
-        conninfo=settings.POSTGRESQL_DATABASE_LINK,
-        kwargs={"autocommit": True, "row_factory": dict_row},
-        max_size=20,
-        open=True,
-    )
+    await store.setup()
 
     # --- Short-term memory ---
-    checkpointer = PostgresSaver(conn=pool)
-    checkpointer.setup()
+    checkpointer = AsyncPostgresSaver(pool)
+    await checkpointer.setup()
 
     return (store, checkpointer)

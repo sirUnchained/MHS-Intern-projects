@@ -40,7 +40,7 @@ def get_insert_ticket_node():
             goals=new_ticket.get("goals"),
             building_name=new_ticket.get("building"),
             building_phone=new_ticket.get("phone"),
-            building_services=new_ticket.get("services"),
+            building_services=", ".join(new_ticket.get("services", [])),
         )
 
         # Insert into DB

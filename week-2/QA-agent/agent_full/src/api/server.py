@@ -1,10 +1,18 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.auth.router import router as auth_router
 from src.auth.models import migrate as migrate_users
 from src.database.models import migrate as migrate_tickets
 from src.api.upload_router import router as upload_router
+from src.api.chat_router import router as chat_router
+from src.api.ticket_router import router as ticket_router
+from src.api.data_router import router as data_router
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 @asynccontextmanager
@@ -25,8 +33,27 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# ======================== CORS =========================
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# =================================================================
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
 app.include_router(auth_router)
 app.include_router(upload_router)
+app.include_router(chat_router)
+app.include_router(ticket_router)
+app.include_router(data_router)
 
 
 @app.get("/health")
