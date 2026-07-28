@@ -8,7 +8,9 @@ class Settings:
 
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY")
     GROQ_MODEL_NAME: str = os.getenv("GROQ_MODEL_NAME", "openai/gpt-oss-20b")
-    GROQ_CLASSIFY_MODEL_NAME: str = os.getenv("GROQ_CLASSIFY_MODEL_NAME", "")
+    GROQ_CLASSIFY_MODEL_NAME: str = os.getenv(
+        "GROQ_CLASSIFY_MODEL_NAME", "meta/llama-3.1-8b-instant"
+    )
 
     OLLAMA_MODEL_NAME: str = os.getenv("OLLAMA_MODEL_NAME", "qwen2.5-1.5b-instruct")
     OLLAMA_EMBEDDING_MODEL_NAME: str = os.getenv("OLLAMA_EMBEDDING_MODEL_NAME")
@@ -35,7 +37,7 @@ _settings = None
 def get_settings() -> Settings:
     global _settings
     if _settings is None:
-        load_dotenv("./.env")
+        load_dotenv()
         _settings = Settings()
     return _settings
 

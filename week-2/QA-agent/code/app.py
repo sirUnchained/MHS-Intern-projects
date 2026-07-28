@@ -6,7 +6,8 @@ import os
 
 def main():
     settings = get_settings()
-    user_id = input("Who are you?")
+    print(settings.GROQ_API_KEY)  # TODO, it prints none, fix it
+    user_id = input("Who are you? ")
     user_prompt = ""
 
     if settings.USE_PROXY:
@@ -15,7 +16,7 @@ def main():
 
     print("q = quit")
     while True:
-        user_prompt = input(f"{user_id}(you'r prompt):")
+        user_prompt = input(f"{user_id} (you'r prompt): ")
         if user_prompt.lower() == "q":
             print("good bye!")
             break
