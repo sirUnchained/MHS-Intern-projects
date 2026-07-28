@@ -5,7 +5,7 @@ from typing import Literal
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.store.base import BaseStore
 
-from helpers import safe_structured_invoke
+from src.helpers import safe_structured_invoke
 from src.state import SupportState
 from src.prompts import DATA_EXTRACTION_FOR_DATABASE_SYSTEM_PROMPT
 

@@ -22,9 +22,11 @@ class Settings:
 
     TAVILY_API_KEY: str = os.getenv("TAVILY_API_KEY")
 
-    IS_DEVELOPMENT: bool = os.getenv("IS_DEVELOPMENT", "true").lower() == "true"
-
     MAX_TOOL_CALLS: int = int(os.getenv("MAX_TOOL_CALLS", "5"))
+
+    IS_DEVELOPMENT: bool = os.getenv("IS_DEVELOPMENT", "true").lower() == "true"
+    USE_PROXY: bool = os.getenv("USE_PROXY", "false").lower() == "true"
+    PROXY_LINK: str = os.getenv("PROXY_LINK")
 
 
 _settings = None
