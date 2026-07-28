@@ -73,3 +73,5 @@ def get_building_classifier_and_ticket_node(llm):
                 )
             ],
         }
+
+    return building_classifier_and_ticket_node

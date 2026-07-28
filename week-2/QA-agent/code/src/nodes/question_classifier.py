@@ -1,10 +1,9 @@
 from src.prompts import QUESTION_CLASSIFIER_SYSTEM_PROMPT
 from src.state import SupportState
 from typing import Literal
-from langchain_core.runnables import RunnableSequence
 
 
-def get_question_classifier_node(llm: RunnableSequence):
+def get_question_classifier_node(llm):
     def question_classifier_node(state: SupportState) -> dict:
         """
         This is Router decistion node, in this node, llm must chose between 2 literals:

@@ -1,11 +1,8 @@
-from sqlalchemy import Column, String, DateTime, Integer, Text
-from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime
-from sqlalchemy import inspect
 from typing import Optional, Any
 from sqlalchemy.orm import sessionmaker
 
-from src.helpers import get_engine
+from src.database.models import Ticket
+from src.database.engine import get_engine
 from src.state import UserTicketData, SupportState
 
 
@@ -13,28 +10,6 @@ def get_insert_ticket_node():
     # Create a session factory (reusable)
     engine = get_engine()
     SessionLocal = sessionmaker(bind=engine)
-    Base = declarative_base()
-
-    class Ticket(Base):
-        __tablename__ = "tickets"
-
-        id = Column(Integer, primary_key=True, autoincrement=True)
-        user_id = Column(String, nullable=False)
-        topic = Column(String)
-        budget = Column(String)
-        job = Column(String)
-        goals = Column(Text)
-        building_name = Column(String)
-        building_phone = Column(String)
-        building_services = Column(
-            Text
-        )  # store as comma-separated or JSON; here as string
-        created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Create table if it dose not exists
-    inspector = inspect(engine)
-    if not inspector.has_table("tickets"):
-        Base.metadata.create_all(engine)
 
     def insert_ticket_node(state: SupportState) -> dict[str, Any]:
         """

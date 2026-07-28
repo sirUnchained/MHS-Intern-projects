@@ -6,6 +6,7 @@ from src.tools.search_tool import get_search_tool
 from src.tools.retriever_tool import get_retriever_tool
 from src.state import SupportState
 from src.prompts import MAIN_AGENT_SYSTEM_PROMPT
+from config import get_settings
 
 
 def get_main_agent_node(llm, embedding_llm):
@@ -65,3 +66,16 @@ def get_main_agent_node(llm, embedding_llm):
         }
 
     return main_agent_node
+
+
+def main_agent_route(state: SupportState):
+    last_msg = state["messages"][-1]
+
+    settings = get_settings()
+    if state.get("tool_calls_count", 0) >= settings.MAX_TOOL_CALLS:
+        return "tool_limit_reached_node"
+
+    if getattr(last_msg, "tool_calls", None):
+        return "tools"
+
+    return "main_agent_response_validator_node"
