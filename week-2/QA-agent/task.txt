@@ -1,0 +1,27 @@
+Almighty 
+
+
+Phases: 
+    Phase 1: 
+    Database and LLM knowledge 
+    Phase 2: 
+    Memory based answering 
+    Phase 3: 
+    Feedback and Database analyser 
+
+
+Phase 1: 
+    Deadline: 
+    28 July 
+
+یادآوری جلسه یک روز قبل از ددلاین
+
+نحوه ارائه: 
+    ابزار های هوش مصنوعی: 
+    Cursor , GPT Codex 
+
+
+
+Chatbot 
+Ticket 
+Adding data 
