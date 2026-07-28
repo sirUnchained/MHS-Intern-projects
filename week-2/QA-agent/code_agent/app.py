@@ -6,7 +6,6 @@ import os
 
 def main():
     settings = get_settings()
-    print(settings.GROQ_API_KEY)  # TODO, it prints none, fix it
     user_id = input("Who are you? ")
     user_prompt = ""
 
@@ -22,6 +21,7 @@ def main():
             break
 
         chat(q=user_prompt, user_id=user_id)
+        print()
 
 
 if __name__ == "__main__":

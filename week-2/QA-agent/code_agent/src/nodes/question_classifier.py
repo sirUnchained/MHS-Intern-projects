@@ -24,7 +24,7 @@ def get_question_classifier_node(llm):
             "rag" if "rag" in result.text.lower() else "escalate"
         )
 
-        return {"route": route}
+        return {"route": route, "tool_calls_count": 0}
 
     return question_classifier_node
 

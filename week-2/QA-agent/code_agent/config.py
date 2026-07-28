@@ -2,6 +2,11 @@ import os
 from dotenv import load_dotenv
 from src.state import BuildingInfo
 
+from dotenv import load_dotenv
+from pathlib import Path
+
+load_dotenv(".env")
+
 
 class Settings:
     """Application settings loaded from environment variables."""
@@ -37,7 +42,6 @@ _settings = None
 def get_settings() -> Settings:
     global _settings
     if _settings is None:
-        load_dotenv()
         _settings = Settings()
     return _settings
 

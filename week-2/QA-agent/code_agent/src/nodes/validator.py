@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 import regex as re
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessage
 
 from src.state import SupportState
 
@@ -34,7 +34,7 @@ def main_agent_response_validator_node(state: SupportState):
         if re.search(pattern, last_msg, re.IGNORECASE):
             return {
                 "messages": [
-                    HumanMessage(
+                    AIMessage(
                         content=f"Agent response was not valid, trying to generate a token for you."
                     )
                 ],

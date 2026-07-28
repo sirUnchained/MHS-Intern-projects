@@ -18,7 +18,7 @@ from src.nodes.question_classifier import (
 )
 from src.nodes.building_classifier import get_building_classifier_and_ticket_node
 from src.nodes.ticket import get_insert_ticket_node
-from src.nodes.main_agent import get_main_agent_node
+from src.nodes.main_agent import get_main_agent_node, main_agent_route
 from src.nodes.tool_limit import tool_limit_reached_node
 from src.nodes.validator import (
     main_agent_response_validator_node,
@@ -103,7 +103,7 @@ def build_graph():
     ## main_agent_node --> tools | main_agent_node --> main_agent_response_validator_node | tools --> tool_limit_reached_node
     graph_builder.add_conditional_edges(
         "main_agent_node",
-        get_main_agent_node(llm=large_language_model, embedding_llm=embedding_model),
+        main_agent_route,
         {
             "tools": "tools",
             "tool_limit_reached_node": "tool_limit_reached_node",

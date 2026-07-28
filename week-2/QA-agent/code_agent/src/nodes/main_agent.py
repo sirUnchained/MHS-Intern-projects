@@ -62,7 +62,8 @@ def get_main_agent_node(llm, embedding_llm):
 
         return {
             "messages": [response],
-            "tool_calls_count": state.get("tool_calls_count", 0) + 1,
+            "tool_calls_count": state.get("tool_calls_count", 0)
+            + (1 if getattr(response, "tool_calls", None) else 0),
         }
 
     return main_agent_node

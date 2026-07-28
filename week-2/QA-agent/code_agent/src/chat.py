@@ -17,7 +17,11 @@ def chat(q: str, user_id: str):
     ):
         node = metadata.get("langgraph_node")
 
-        if node == "main_agent_node" or node == "insert_ticket_node":
+        if node in (
+            "main_agent_node",
+            "insert_ticket_node",
+            "building_classifier_and_ticket_node",
+        ):
             if settings.IS_DEVELOPMENT:
                 if msg_chunk.tool_calls:
                     for tc in msg_chunk.tool_calls:

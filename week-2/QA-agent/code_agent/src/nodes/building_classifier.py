@@ -65,11 +65,25 @@ def get_building_classifier_and_ticket_node(llm):
                 new_ticket["services"] = b["services"]
                 break
 
+        if "building" not in new_ticket:
+            fallback = SUPPORT_BUILDINGS[1]
+            new_ticket.update(
+                {
+                    "topic": result.topic,
+                    "budget": result.budget,
+                    "job": result.job,
+                    "goals": result.goals,
+                    "building": fallback["name"],
+                    "phone": fallback["phone"],
+                    "services": fallback["services"],
+                }
+            )
+
         return {
             "new_ticket": new_ticket,
             "messages": [
                 AIMessage(
-                    content=f"Agent response failed the validation, redirecting you'r request to {new_ticket['building']}"
+                    content=f"Redirecting you'r request to {new_ticket['building']}"
                 )
             ],
         }
