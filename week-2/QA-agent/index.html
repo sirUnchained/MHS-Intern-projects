@@ -366,6 +366,7 @@
             font-weight: 600;
         }
 
+        /* ===== Tickets ===== */
         .ticket-table {
             color: var(--text-light);
         }
@@ -406,6 +407,21 @@
         .badge-status.pending {
             background: rgba(74, 140, 255, 0.2);
             color: #4a8cff;
+        }
+
+        .btn-close-ticket {
+            background: rgba(255, 82, 82, 0.2);
+            color: #ff5252;
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: 20px;
+            padding: 2px 12px;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .btn-close-ticket:hover {
+            background: #ff5252;
+            color: #fff;
         }
 
         /* ===== Chat ===== */
@@ -749,6 +765,10 @@
         .text-center {
             text-align: center;
         }
+
+        .mb-2 {
+            margin-bottom: 0.5rem !important;
+        }
     </style>
 </head>
 
@@ -778,6 +798,10 @@
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
                     <li class="nav-item">
                         <a class="nav-link active" data-page="dashboard" href="#"><i class="fas fa-home"></i>داشبورد</a>
+                    </li>
+                    <!-- NEW: Tickets page link -->
+                    <li class="nav-item">
+                        <a class="nav-link" data-page="tickets" href="#"><i class="fas fa-ticket-alt"></i>تیکت‌ها</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" data-page="admin" href="#"><i class="fas fa-shield-alt"></i>ادمین</a>
@@ -895,10 +919,71 @@
             </div>
         </div>
 
-        <!-- ===== ADMIN ===== -->
+        <!-- ===== TICKETS PAGE (NEW) ===== -->
+        <div class="section-page" id="page-tickets">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+                <div>
+                    <h2 class="section-title"><i class="fas fa-ticket-alt text-gold me-2"></i>تیکت‌ها</h2>
+                    <p class="section-subtitle">مدیریت و مشاهده تیکت‌های پشتیبانی</p>
+                </div>
+                <button class="btn btn-outline-gold" id="refreshTicketsBtn">
+                    <i class="fas fa-sync-alt"></i> بروزرسانی
+                </button>
+            </div>
+
+            <!-- Create Ticket Form -->
+            <div class="glass-card mb-4">
+                <h5 class="text-gold mb-3"><i class="fas fa-plus-circle me-2"></i>ایجاد تیکت جدید</h5>
+                <form id="createTicketForm">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small">موضوع (topic)</label>
+                            <input type="text" class="form-control" id="ticketTopic" placeholder="موضوع تیکت"
+                                required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-muted small">اهداف (goals)</label>
+                            <input type="text" class="form-control" id="ticketGoals" placeholder="اهداف / توضیحات" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-muted small">بودجه (اختیاری)</label>
+                            <input type="text" class="form-control" id="ticketBudget" placeholder="بودجه" />
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-gold w-100"><i class="fas fa-plus"></i> ایجاد</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tickets Table -->
+            <div class="glass-card">
+                <div class="table-wrap">
+                    <table class="table ticket-table" id="ticketsTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>عنوان</th>
+                                <th>وضعیت</th>
+                                <th>تاریخ</th>
+                                <th>کاربر</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticketsBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">در حال بارگذاری...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ADMIN (upload only) ===== -->
         <div class="section-page" id="page-admin">
             <h2 class="section-title"><i class="fas fa-shield-alt text-gold me-2"></i>پنل مدیریت</h2>
-            <p class="section-subtitle">آپلود فایل و مدیریت تیکت‌ها</p>
+            <p class="section-subtitle">آپلود فایل‌ها</p>
 
             <!-- Upload -->
             <div class="admin-section">
@@ -915,36 +1000,6 @@
                             <i class="fas fa-upload me-2"></i>آپلود فایل
                         </button>
                     </form>
-                </div>
-            </div>
-
-            <!-- Tickets -->
-            <div class="admin-section">
-                <div class="glass-card">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
-                        <h5 class="text-gold mb-0"><i class="fas fa-ticket-alt me-2"></i>تیکت‌ها</h5>
-                        <button class="btn btn-outline-gold btn-sm" id="refreshTicketsBtn">
-                            <i class="fas fa-sync-alt"></i> بروزرسانی
-                        </button>
-                    </div>
-                    <div class="table-wrap">
-                        <table class="table ticket-table" id="ticketsTable">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>عنوان</th>
-                                    <th>وضعیت</th>
-                                    <th>تاریخ</th>
-                                    <th>کاربر</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ticketsBody">
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">در حال بارگذاری...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
         </div>
@@ -989,7 +1044,7 @@
     </script>
 
     <!-- ============================================================
-    MAIN APPLICATION – ALL IMPROVEMENTS INCLUDED
+    MAIN APPLICATION
     ============================================================ -->
     <script>
         (function () {
@@ -1035,8 +1090,8 @@
             let assetRefreshInterval = null;
 
             // ---- Message buffering for streaming responses ----
-            const messageBuffer = {}; // key: sender, value: { text, timer, container, isSelf }
-            const displayedSelfMessages = new Set(); // stores ids of self messages already shown
+            const messageBuffer = {};
+            const displayedSelfMessages = new Set();
 
             // ============================================================
             //  DOM REFS
@@ -1048,6 +1103,7 @@
                 dashboard: $('#page-dashboard'),
                 login: $('#page-login'),
                 signup: $('#page-signup'),
+                tickets: $('#page-tickets'),
                 admin: $('#page-admin'),
                 chat: $('#page-chat'),
             };
@@ -1078,8 +1134,13 @@
             const selectedFileName = $('#selectedFileName');
             const uploadBtn = $('#uploadBtn');
 
+            // Tickets page elements
             const ticketsBody = $('#ticketsBody');
             const refreshTicketsBtn = $('#refreshTicketsBtn');
+            const createTicketForm = $('#createTicketForm');
+            const ticketTopic = $('#ticketTopic');
+            const ticketGoals = $('#ticketGoals');
+            const ticketBudget = $('#ticketBudget');
 
             const chatMessages = $('#chatMessages');
             const chatInput = $('#chatInput');
@@ -1131,11 +1192,13 @@
                     link.classList.toggle('active', link.dataset.page === pageId);
                 });
 
-                if (pageId === 'admin' && currentUser) {
-                    // load tickets immediately when admin page is shown
+                // Load data based on page
+                if (pageId === 'tickets' && currentUser) {
                     loadTickets();
                 }
-
+                if (pageId === 'admin' && currentUser) {
+                    // admin page only upload, no tickets
+                }
                 if (pageId === 'chat') {
                     connectWebSocket();
                 }
@@ -1145,7 +1208,8 @@
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const page = link.dataset.page;
-                    if (page === 'admin' && !currentUser) {
+                    // Check access
+                    if ((page === 'tickets' || page === 'admin') && !currentUser) {
                         showToast('لطفاً ابتدا وارد شوید.', 'error');
                         navigateTo('login');
                         return;
@@ -1183,19 +1247,22 @@
                     userBadge.classList.remove('hidden');
                     userNameDisplay.textContent = currentUser.username;
                     userAvatar.textContent = currentUser.username.charAt(0).toUpperCase();
+                    // Show/hide admin link (only if admin)
                     const adminLink = document.querySelector('.nav-link[data-page="admin"]');
                     if (adminLink) {
                         adminLink.style.display = currentUser.isAdmin ? '' : 'none';
                     }
+                    // Tickets link is always visible when logged in
                 } else {
                     authButtons.classList.remove('hidden');
                     userBadge.classList.add('hidden');
                     const adminLink = document.querySelector('.nav-link[data-page="admin"]');
                     if (adminLink) adminLink.style.display = 'none';
+                    // If on restricted page, redirect to dashboard
                     const activePage = document.querySelector('.section-page.active');
                     if (activePage) {
                         const id = activePage.id.replace('page-', '');
-                        if (id === 'admin' || id === 'chat') {
+                        if (id === 'tickets' || id === 'admin' || id === 'chat') {
                             navigateTo('dashboard');
                         }
                     }
@@ -1490,43 +1557,25 @@
             }
 
             // ============================================================
-            //  ADMIN: TICKETS  (WITH VERBOSE LOGGING & MOCK DATA)
+            //  TICKETS – FULL CRUD (matching backend structure)
             // ============================================================
+
+            // ---- Load tickets ----
             async function loadTickets() {
                 console.log('🚀 loadTickets() called');
-
-                // 1. Check user
-                console.log('👤 currentUser:', currentUser);
                 if (!currentUser) {
-                    console.warn('❌ No user logged in');
                     ticketsBody.innerHTML =
-                        `<tr><td colspan="5" class="text-center text-muted">برای مشاهده تیکت‌ها وارد شوید.</td></tr>`;
-                    return;
-                }
-
-                // 2. Check DOM element
-                console.log('📌 ticketsBody element:', ticketsBody);
-                if (!ticketsBody) {
-                    console.error('💥 ticketsBody is null! Check the ID.');
+                        `<tr><td colspan="6" class="text-center text-muted">برای مشاهده تیکت‌ها وارد شوید.</td></tr>`;
                     return;
                 }
 
                 ticketsBody.innerHTML =
-                    `<tr><td colspan="5" class="text-center text-muted"><i class="fas fa-spinner fa-spin me-2"></i>در حال بارگذاری...</td></tr>`;
-
-                // 3. MOCK DATA – replace this with real API call when backend is ready
-                const data = [
-                    { id: 1, title: 'Test ticket 1', status: 'open', created_at: '2026-07-28', user: 'admin' },
-                    { id: 2, title: 'Test ticket 2', status: 'closed', created_at: '2026-07-27', user: 'alice' }
-                ];
-                console.log('📦 Using mock data:', data);
+                    `<tr><td colspan="6" class="text-center text-muted"><i class="fas fa-spinner fa-spin me-2"></i>در حال بارگذاری...</td></tr>`;
 
                 try {
-                    // 4. (Uncomment when backend is ready)
-                    // const data = await apiFetch('/admin/ticket');
-                    // console.log('📦 Raw response:', data);
+                    const data = await apiFetch('/admin/tickets');
+                    console.log('📦 Raw tickets response:', data);
 
-                    // 5. Extract tickets array
                     let tickets = [];
                     if (Array.isArray(data)) {
                         tickets = data;
@@ -1537,51 +1586,120 @@
                     } else if (data.items && Array.isArray(data.items)) {
                         tickets = data.items;
                     } else {
-                        // fallback: try to extract any array-like object
-                        const possibleArray = Object.values(data).filter(v => typeof v === 'object' && v !== null);
-                        if (possibleArray.length > 0 && possibleArray.every(v => typeof v === 'object')) {
-                            tickets = possibleArray;
-                        } else {
-                            tickets = [];
-                        }
+                        tickets = [];
                     }
 
                     console.log(`✅ Found ${tickets.length} tickets:`, tickets);
 
                     if (tickets.length === 0) {
                         ticketsBody.innerHTML =
-                            `<tr><td colspan="5" class="text-center text-muted">هیچ تیکتی وجود ندارد.</td></tr>`;
-                        console.log('ℹ️ No tickets to display.');
+                            `<tr><td colspan="6" class="text-center text-muted">هیچ تیکتی وجود ندارد.</td></tr>`;
                         return;
                     }
 
-                    // 6. Render tickets
                     ticketsBody.innerHTML = '';
                     tickets.forEach((t, idx) => {
                         const tr = document.createElement('tr');
-                        const status = (t.status || 'open').toLowerCase();
-                        const statusMap = {
-                            open: 'باز',
-                            closed: 'بسته',
-                            pending: 'در انتظار',
-                        };
+
+                        // Map backend fields to display
+                        const title = t.topic || t.building_name || t.job || 'بدون عنوان';
+                        // No status field, assume open
+                        const status = 'open';
+                        const statusLabel = 'باز';
+                        const user = t.user_id || '—';
+                        const date = t.created_at ? new Date(t.created_at).toLocaleDateString('fa-IR') : '—';
+                        const isAdmin = currentUser?.isAdmin || false;
+
                         tr.innerHTML = `
                             <td>${idx + 1}</td>
-                            <td>${t.title || t.subject || t.ticket_title || 'بدون عنوان'}</td>
-                            <td><span class="badge-status ${status}">${statusMap[status] || status}</span></td>
-                            <td>${t.created_at || t.date || t.timestamp || '—'}</td>
-                            <td>${t.user || t.username || t.creator || '—'}</td>
+                            <td>${title}</td>
+                            <td><span class="badge-status open">${statusLabel}</span></td>
+                            <td>${date}</td>
+                            <td>${user}</td>
+                            <td>
+                                ${isAdmin ? `<button class="btn-close-ticket" data-id="${t.id}" data-title="${title}">بستن</button>` : '—'}
+                            </td>
                         `;
                         ticketsBody.appendChild(tr);
                     });
-                    console.log('✅ Tickets rendered successfully!');
+
+                    // Attach close event listeners (only for admin)
+                    document.querySelectorAll('.btn-close-ticket').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const id = btn.dataset.id;
+                            const title = btn.dataset.title;
+                            if (confirm(`آیا تیکت "${title}" را می‌بندید؟`)) {
+                                await closeTicket(id);
+                            }
+                        });
+                    });
+
                 } catch (err) {
-                    console.error('❌ Error in loadTickets:', err);
+                    console.error('❌ Error loading tickets:', err);
                     ticketsBody.innerHTML =
-                        `<tr><td colspan="5" class="text-center text-danger">خطا: ${err.message || 'بارگذاری ناموفق'}</td></tr>`;
+                        `<tr><td colspan="6" class="text-center text-danger">خطا: ${err.message || 'بارگذاری ناموفق'}</td></tr>`;
                     showToast('خطا در دریافت تیکت‌ها: ' + err.message, 'error');
                 }
             }
+
+            // ---- Create ticket ----
+            async function createTicket(topic, goals, budget) {
+                showSpinner(true);
+                try {
+                    // Build payload matching backend schema
+                    const payload = {
+                        topic: topic,
+                        goals: goals,
+                        budget: budget || '',
+                        // other fields can be added if needed
+                    };
+                    await apiFetch('/admin/tickets', {
+                        method: 'POST',
+                        body: JSON.stringify(payload),
+                    });
+                    showToast('تیکت با موفقیت ایجاد شد!', 'success');
+                    ticketTopic.value = '';
+                    ticketGoals.value = '';
+                    ticketBudget.value = '';
+                    loadTickets(); // refresh list
+                } catch (err) {
+                    showToast('خطا در ایجاد تیکت: ' + err.message, 'error');
+                } finally {
+                    showSpinner(false);
+                }
+            }
+
+            // ---- Close ticket ----
+            async function closeTicket(id) {
+                showSpinner(true);
+                try {
+                    await apiFetch(`/admin/tickets/${id}/close`, {
+                        method: 'PATCH',
+                    });
+                    showToast('تیکت بسته شد!', 'success');
+                    loadTickets(); // refresh list
+                } catch (err) {
+                    showToast('خطا در بستن تیکت: ' + err.message, 'error');
+                } finally {
+                    showSpinner(false);
+                }
+            }
+
+            // ---- Setup create ticket form ----
+            createTicketForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const topic = ticketTopic.value.trim();
+                const goals = ticketGoals.value.trim();
+                const budget = ticketBudget.value.trim();
+                if (!topic) {
+                    showToast('لطفاً موضوع تیکت را وارد کنید.', 'error');
+                    return;
+                }
+                createTicket(topic, goals, budget);
+            });
+
+            // ---- Refresh button ----
+            refreshTicketsBtn.addEventListener('click', loadTickets);
 
             // ============================================================
             //  CHAT – with buffering and optimistic self messages
@@ -1722,13 +1840,11 @@
                         const isSelf = sender === currentUser?.username;
                         const msgId = data.id || data.msgId || null;
 
-                        // If this is a self message that we already displayed optimistically, skip it
                         if (isSelf && msgId && displayedSelfMessages.has(msgId)) {
-                            displayedSelfMessages.delete(msgId); // clean up
+                            displayedSelfMessages.delete(msgId);
                             return;
                         }
 
-                        // Buffer all incoming messages (including self if not displayed)
                         bufferMessage(sender, text, isSelf);
                     };
 
@@ -1763,19 +1879,15 @@
                     return;
                 }
 
-                // Generate a unique ID for this message
                 const msgId = `msg-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-
-                // Display optimistically
                 addChatMessage(text, currentUser.username, true, msgId);
                 displayedSelfMessages.add(msgId);
 
-                // Send via WebSocket
                 const payload = JSON.stringify({
                     message: text,
                     username: currentUser.username,
                     timestamp: new Date().toISOString(),
-                    id: msgId, // include the ID so server can echo it back
+                    id: msgId,
                 });
                 ws.send(payload);
 
@@ -1814,7 +1926,6 @@
                 signupForm.addEventListener('submit', handleSignup);
                 logoutBtn.addEventListener('click', handleLogout);
                 refreshAssetsBtn.addEventListener('click', loadAssets);
-                refreshTicketsBtn.addEventListener('click', loadTickets);
 
                 chatSendBtn.addEventListener('click', sendChatMessage);
                 chatInput.addEventListener('keydown', (e) => {
@@ -1826,13 +1937,10 @@
                 loadAssets();
 
                 if (currentUser) {
-                    // If user is admin, load tickets now (but also when navigating)
-                    if (currentUser.isAdmin) {
-                        // loadTickets will be called when admin page is shown,
-                        // but we can preload in background
+                    // If tickets page is active on load, load tickets
+                    if (document.querySelector('#page-tickets.active')) {
                         loadTickets();
                     }
-                    // If chat page is active, connect
                     if (document.querySelector('#page-chat.active')) {
                         connectWebSocket();
                     }
