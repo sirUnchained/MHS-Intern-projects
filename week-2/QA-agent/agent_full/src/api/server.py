@@ -4,11 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.auth.router import router as auth_router
 from src.auth.models import migrate as migrate_users
-from src.database.models import migrate as migrate_tickets
+from src.database.models import migrate as migrate_tickets_and_feedback
 from src.api.upload_router import router as upload_router
 from src.api.chat_router import router as chat_router
 from src.api.ticket_router import router as ticket_router
 from src.api.data_router import router as data_router
+from src.api.feedback_router import router as feedback_router
 
 from dotenv import load_dotenv
 
@@ -18,7 +19,7 @@ load_dotenv()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     migrate_users()
-    migrate_tickets()
+    migrate_tickets_and_feedback()
     yield
 
 
@@ -54,6 +55,7 @@ app.include_router(upload_router)
 app.include_router(chat_router)
 app.include_router(ticket_router)
 app.include_router(data_router)
+app.include_router(feedback_router)
 
 
 @app.get("/health")

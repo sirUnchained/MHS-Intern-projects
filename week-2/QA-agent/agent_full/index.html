@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" />
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         /* ===== Custom Variables ===== */
@@ -481,7 +483,7 @@
         .chat-messages .msg {
             padding: 10px 16px;
             border-radius: 12px;
-            max-width: 75%;
+            max-width: 85%;
             word-wrap: break-word;
             font-size: 0.95rem;
             animation: fadeUp 0.25s ease;
@@ -508,11 +510,131 @@
             display: block;
         }
 
+        .chat-messages .msg .markdown-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .chat-messages .msg .markdown-body table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .chat-messages .msg .markdown-body table th,
+        .chat-messages .msg .markdown-body table td {
+            border: 1px solid var(--primary-border);
+            padding: 6px 10px;
+            text-align: right;
+        }
+
+        .chat-messages .msg .markdown-body table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+        }
+
+        .chat-messages .msg .markdown-body code {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .chat-messages .msg .markdown-body pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--primary-border);
+        }
+
+        .chat-messages .msg .markdown-body blockquote {
+            border-right: 4px solid var(--accent-gold);
+            padding-right: 12px;
+            margin: 8px 0;
+            color: var(--text-muted);
+        }
+
         .chat-messages .system-msg {
             text-align: center;
             color: var(--text-muted);
             font-size: 0.85rem;
             padding: 8px 0;
+        }
+
+        /* Tool call message */
+        .chat-messages .tool-call-msg {
+            background: rgba(74, 140, 255, 0.1);
+            border: 1px solid var(--accent-blue);
+            border-radius: 10px;
+            padding: 10px 16px;
+            margin: 4px 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            align-self: flex-start;
+            max-width: 85%;
+        }
+
+        .chat-messages .tool-call-msg i {
+            color: var(--accent-blue);
+            margin-left: 8px;
+        }
+
+        .chat-messages .tool-call-msg .tool-detail {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 4px;
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: block;
+        }
+
+        /* Feedback buttons */
+        .feedback-buttons .btn {
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            border-radius: 20px;
+        }
+
+        .feedback-buttons .btn-outline-success {
+            color: #00e676;
+            border-color: #00e676;
+        }
+
+        .feedback-buttons .btn-outline-success:hover {
+            background: #00e676;
+            color: #0b0e1a;
+        }
+
+        .feedback-buttons .btn-outline-danger {
+            color: #ff5252;
+            border-color: #ff5252;
+        }
+
+        .feedback-buttons .btn-outline-danger:hover {
+            background: #ff5252;
+            color: #0b0e1a;
+        }
+
+        .feedback-buttons .btn-success {
+            background: #00e676;
+            border-color: #00e676;
+            color: #0b0e1a;
+        }
+
+        .feedback-buttons .btn-danger {
+            background: #ff5252;
+            border-color: #ff5252;
+            color: #0b0e1a;
+        }
+
+        .feedback-buttons .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .chat-input-area {
@@ -799,7 +921,6 @@
                     <li class="nav-item">
                         <a class="nav-link active" data-page="dashboard" href="#"><i class="fas fa-home"></i>داشبورد</a>
                     </li>
-                    <!-- NEW: Tickets page link -->
                     <li class="nav-item">
                         <a class="nav-link" data-page="tickets" href="#"><i class="fas fa-ticket-alt"></i>تیکت‌ها</a>
                     </li>
@@ -919,7 +1040,7 @@
             </div>
         </div>
 
-        <!-- ===== TICKETS PAGE (NEW) ===== -->
+        <!-- ===== TICKETS ===== -->
         <div class="section-page" id="page-tickets">
             <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
                 <div>
@@ -980,7 +1101,7 @@
             </div>
         </div>
 
-        <!-- ===== ADMIN (upload only) ===== -->
+        <!-- ===== ADMIN ===== -->
         <div class="section-page" id="page-admin">
             <h2 class="section-title"><i class="fas fa-shield-alt text-gold me-2"></i>پنل مدیریت</h2>
             <p class="section-subtitle">آپلود فایل‌ها</p>
@@ -1088,6 +1209,8 @@
             let wsConnected = false;
             let chatReconnectTimer = null;
             let assetRefreshInterval = null;
+            // thread_id برای feedback (فعلاً ثابت)
+            const THREAD_ID = 'global';
 
             // ---- Message buffering for streaming responses ----
             const messageBuffer = {};
@@ -1134,7 +1257,6 @@
             const selectedFileName = $('#selectedFileName');
             const uploadBtn = $('#uploadBtn');
 
-            // Tickets page elements
             const ticketsBody = $('#ticketsBody');
             const refreshTicketsBtn = $('#refreshTicketsBtn');
             const createTicketForm = $('#createTicketForm');
@@ -1153,7 +1275,7 @@
             const toastContainer = $('#toastContainer');
 
             // ============================================================
-            //  TOAST / NOTIFICATION
+            //  TOAST
             // ============================================================
             function showToast(message, type = 'info', duration = 4000) {
                 const icons = {
@@ -1174,7 +1296,7 @@
             }
 
             // ============================================================
-            //  LOADING SPINNER
+            //  LOADING
             // ============================================================
             function showSpinner(show) {
                 spinner.classList.toggle('show', show);
@@ -1192,12 +1314,11 @@
                     link.classList.toggle('active', link.dataset.page === pageId);
                 });
 
-                // Load data based on page
                 if (pageId === 'tickets' && currentUser) {
                     loadTickets();
                 }
                 if (pageId === 'admin' && currentUser) {
-                    // admin page only upload, no tickets
+                    // nothing
                 }
                 if (pageId === 'chat') {
                     connectWebSocket();
@@ -1208,7 +1329,6 @@
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const page = link.dataset.page;
-                    // Check access
                     if ((page === 'tickets' || page === 'admin') && !currentUser) {
                         showToast('لطفاً ابتدا وارد شوید.', 'error');
                         navigateTo('login');
@@ -1239,7 +1359,7 @@
             });
 
             // ============================================================
-            //  AUTH STATE
+            //  AUTH
             // ============================================================
             function updateAuthUI() {
                 if (currentUser) {
@@ -1247,18 +1367,15 @@
                     userBadge.classList.remove('hidden');
                     userNameDisplay.textContent = currentUser.username;
                     userAvatar.textContent = currentUser.username.charAt(0).toUpperCase();
-                    // Show/hide admin link (only if admin)
                     const adminLink = document.querySelector('.nav-link[data-page="admin"]');
                     if (adminLink) {
                         adminLink.style.display = currentUser.isAdmin ? '' : 'none';
                     }
-                    // Tickets link is always visible when logged in
                 } else {
                     authButtons.classList.remove('hidden');
                     userBadge.classList.add('hidden');
                     const adminLink = document.querySelector('.nav-link[data-page="admin"]');
                     if (adminLink) adminLink.style.display = 'none';
-                    // If on restricted page, redirect to dashboard
                     const activePage = document.querySelector('.section-page.active');
                     if (activePage) {
                         const id = activePage.id.replace('page-', '');
@@ -1270,7 +1387,7 @@
             }
 
             // ============================================================
-            //  API HELPERS
+            //  API
             // ============================================================
             async function apiFetch(endpoint, options = {}) {
                 const url = `${BASE_URL}${endpoint}`;
@@ -1304,7 +1421,7 @@
             }
 
             // ============================================================
-            //  AUTH
+            //  AUTH HANDLERS
             // ============================================================
             async function handleLogin(e) {
                 e.preventDefault();
@@ -1557,12 +1674,9 @@
             }
 
             // ============================================================
-            //  TICKETS – FULL CRUD (matching backend structure)
+            //  TICKETS
             // ============================================================
-
-            // ---- Load tickets ----
             async function loadTickets() {
-                console.log('🚀 loadTickets() called');
                 if (!currentUser) {
                     ticketsBody.innerHTML =
                         `<tr><td colspan="6" class="text-center text-muted">برای مشاهده تیکت‌ها وارد شوید.</td></tr>`;
@@ -1574,8 +1688,6 @@
 
                 try {
                     const data = await apiFetch('/admin/tickets');
-                    console.log('📦 Raw tickets response:', data);
-
                     let tickets = [];
                     if (Array.isArray(data)) {
                         tickets = data;
@@ -1589,8 +1701,6 @@
                         tickets = [];
                     }
 
-                    console.log(`✅ Found ${tickets.length} tickets:`, tickets);
-
                     if (tickets.length === 0) {
                         ticketsBody.innerHTML =
                             `<tr><td colspan="6" class="text-center text-muted">هیچ تیکتی وجود ندارد.</td></tr>`;
@@ -1600,10 +1710,7 @@
                     ticketsBody.innerHTML = '';
                     tickets.forEach((t, idx) => {
                         const tr = document.createElement('tr');
-
-                        // Map backend fields to display
                         const title = t.topic || t.building_name || t.job || 'بدون عنوان';
-                        // No status field, assume open
                         const status = 'open';
                         const statusLabel = 'باز';
                         const user = t.user_id || '—';
@@ -1623,7 +1730,6 @@
                         ticketsBody.appendChild(tr);
                     });
 
-                    // Attach close event listeners (only for admin)
                     document.querySelectorAll('.btn-close-ticket').forEach(btn => {
                         btn.addEventListener('click', async (e) => {
                             const id = btn.dataset.id;
@@ -1635,23 +1741,19 @@
                     });
 
                 } catch (err) {
-                    console.error('❌ Error loading tickets:', err);
                     ticketsBody.innerHTML =
                         `<tr><td colspan="6" class="text-center text-danger">خطا: ${err.message || 'بارگذاری ناموفق'}</td></tr>`;
                     showToast('خطا در دریافت تیکت‌ها: ' + err.message, 'error');
                 }
             }
 
-            // ---- Create ticket ----
             async function createTicket(topic, goals, budget) {
                 showSpinner(true);
                 try {
-                    // Build payload matching backend schema
                     const payload = {
                         topic: topic,
                         goals: goals,
                         budget: budget || '',
-                        // other fields can be added if needed
                     };
                     await apiFetch('/admin/tickets', {
                         method: 'POST',
@@ -1661,7 +1763,7 @@
                     ticketTopic.value = '';
                     ticketGoals.value = '';
                     ticketBudget.value = '';
-                    loadTickets(); // refresh list
+                    loadTickets();
                 } catch (err) {
                     showToast('خطا در ایجاد تیکت: ' + err.message, 'error');
                 } finally {
@@ -1669,7 +1771,6 @@
                 }
             }
 
-            // ---- Close ticket ----
             async function closeTicket(id) {
                 showSpinner(true);
                 try {
@@ -1677,7 +1778,7 @@
                         method: 'PATCH',
                     });
                     showToast('تیکت بسته شد!', 'success');
-                    loadTickets(); // refresh list
+                    loadTickets();
                 } catch (err) {
                     showToast('خطا در بستن تیکت: ' + err.message, 'error');
                 } finally {
@@ -1685,7 +1786,6 @@
                 }
             }
 
-            // ---- Setup create ticket form ----
             createTicketForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const topic = ticketTopic.value.trim();
@@ -1698,11 +1798,76 @@
                 createTicket(topic, goals, budget);
             });
 
-            // ---- Refresh button ----
             refreshTicketsBtn.addEventListener('click', loadTickets);
 
             // ============================================================
-            //  CHAT – with buffering and optimistic self messages
+            //  FEEDBACK (updated to /chat/feedback with thread_id)
+            // ============================================================
+            async function sendFeedback(messageId, rating) {
+                if (!currentUser) {
+                    throw new Error('لطفاً وارد شوید.');
+                }
+                const payload = {
+                    thread_id: THREAD_ID,
+                    message_id: messageId,
+                    rating: rating, // 1 or -1
+                    comment: null,
+                };
+                await apiFetch('/chat/feedback', {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                });
+            }
+
+            function addFeedbackButtons(container, msgId) {
+                if (container.querySelector('.feedback-buttons')) return;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'feedback-buttons mt-2 d-flex gap-2';
+                wrapper.style.fontSize = '0.9rem';
+
+                const likeBtn = document.createElement('button');
+                likeBtn.className = 'btn btn-sm btn-outline-success';
+                likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i>';
+                likeBtn.title = 'پسندیدن';
+
+                const dislikeBtn = document.createElement('button');
+                dislikeBtn.className = 'btn btn-sm btn-outline-danger';
+                dislikeBtn.innerHTML = '<i class="fas fa-thumbs-down"></i>';
+                dislikeBtn.title = 'نپسندیدن';
+
+                wrapper.appendChild(likeBtn);
+                wrapper.appendChild(dislikeBtn);
+                container.appendChild(wrapper);
+
+                let rated = false;
+                const handleRating = async (rating) => {
+                    if (rated) return;
+                    rated = true;
+                    likeBtn.disabled = true;
+                    dislikeBtn.disabled = true;
+                    try {
+                        await sendFeedback(msgId, rating);
+                        if (rating === 1) {
+                            likeBtn.classList.remove('btn-outline-success');
+                            likeBtn.classList.add('btn-success');
+                        } else {
+                            dislikeBtn.classList.remove('btn-outline-danger');
+                            dislikeBtn.classList.add('btn-danger');
+                        }
+                        showToast('نظر شما ثبت شد!', 'success');
+                    } catch (err) {
+                        rated = false;
+                        likeBtn.disabled = false;
+                        dislikeBtn.disabled = false;
+                        showToast('خطا در ثبت نظر: ' + err.message, 'error');
+                    }
+                };
+                likeBtn.addEventListener('click', () => handleRating(1));
+                dislikeBtn.addEventListener('click', () => handleRating(-1));
+            }
+
+            // ============================================================
+            //  CHAT – with Markdown rendering and buffering by message_id
             // ============================================================
             function setChatStatus(connected, statusText) {
                 if (connected) {
@@ -1718,16 +1883,36 @@
                 }
             }
 
+            // ---- Markdown rendering ----
+            function renderMarkdown(text) {
+                try {
+                    return marked.parse(text);
+                } catch (_) {
+                    return text;
+                }
+            }
+
             function addChatMessage(text, sender, isSelf, msgId = null) {
                 const div = document.createElement('div');
                 div.className = `msg ${isSelf ? 'self' : 'other'}`;
                 if (msgId) div.dataset.msgId = msgId;
                 div.dataset.sender = sender;
                 const time = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
-                div.innerHTML = `
-                    <div>${text}</div>
-                    <span class="msg-meta">${sender} • ${time}</span>
-                `;
+
+                const contentDiv = document.createElement('div');
+                if (sender === 'assistant' && !isSelf) {
+                    contentDiv.className = 'markdown-body';
+                    contentDiv.innerHTML = renderMarkdown(text);
+                } else {
+                    contentDiv.textContent = text;
+                }
+
+                const meta = document.createElement('span');
+                meta.className = 'msg-meta';
+                meta.textContent = `${sender} • ${time}`;
+
+                div.appendChild(contentDiv);
+                div.appendChild(meta);
                 chatMessages.appendChild(div);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
                 return div;
@@ -1741,56 +1926,88 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
 
-            // ---- Buffering functions ----
-            function flushBuffer(sender) {
-                const entry = messageBuffer[sender];
+            function addToolCallMessage(name, args) {
+                const div = document.createElement('div');
+                div.className = 'tool-call-msg';
+                div.innerHTML = `
+                    <i class="fas fa-cogs"></i>
+                    <span>فراخوانی ابزار: <strong>${name}</strong></span>
+                    <span class="tool-detail">${JSON.stringify(args, null, 2)}</span>
+                `;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // ---- Buffering by message_id ----
+            function flushBuffer(key) {
+                const entry = messageBuffer[key];
                 if (!entry) return;
-                delete messageBuffer[sender];
+                delete messageBuffer[key];
 
                 const finalText = entry.text.trim();
                 if (!finalText) return;
 
                 if (entry.container) {
                     const contentDiv = entry.container.querySelector('div');
-                    if (contentDiv) contentDiv.textContent = finalText;
+                    if (contentDiv) {
+                        if (entry.sender === 'assistant' && !entry.isSelf) {
+                            contentDiv.className = 'markdown-body';
+                            contentDiv.innerHTML = renderMarkdown(finalText);
+                        } else {
+                            contentDiv.textContent = finalText;
+                        }
+                    }
                     const meta = entry.container.querySelector('.msg-meta');
                     if (meta) {
                         const time = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
-                        meta.textContent = `${sender} • ${time}`;
+                        meta.textContent = `${entry.sender} • ${time}`;
+                    }
+                    if (!entry.isSelf && entry.sender === 'assistant' && entry.msgId) {
+                        addFeedbackButtons(entry.container, entry.msgId);
                     }
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 } else {
-                    addChatMessage(finalText, sender, entry.isSelf);
+                    addChatMessage(finalText, entry.sender, entry.isSelf, entry.msgId);
                 }
             }
 
-            function bufferMessage(sender, text, isSelf) {
-                if (messageBuffer[sender]) {
-                    const entry = messageBuffer[sender];
+            function bufferMessage(sender, text, isSelf, msgId) {
+                const key = msgId || sender;
+
+                if (messageBuffer[key]) {
+                    const entry = messageBuffer[key];
                     entry.text += text;
                     clearTimeout(entry.timer);
-
                     if (entry.container) {
                         const contentDiv = entry.container.querySelector('div');
-                        if (contentDiv) contentDiv.textContent = entry.text;
+                        if (contentDiv) {
+                            if (sender === 'assistant' && !isSelf) {
+                                contentDiv.className = 'markdown-body';
+                                contentDiv.innerHTML = renderMarkdown(entry.text);
+                            } else {
+                                contentDiv.textContent = entry.text;
+                            }
+                        }
                         chatMessages.scrollTop = chatMessages.scrollHeight;
                     }
-
                     entry.timer = setTimeout(() => {
-                        flushBuffer(sender);
-                    }, 300);
+                        flushBuffer(key);
+                    }, 500);
                     return;
                 }
 
-                // First message from this sender
-                const container = addChatMessage(text, sender, isSelf);
+                const container = addChatMessage(text, sender, isSelf, msgId);
                 const entry = {
                     text: text,
-                    timer: setTimeout(() => { flushBuffer(sender); }, 300),
+                    timer: setTimeout(() => {
+                        flushBuffer(key);
+                    }, 500),
                     container: container,
                     isSelf: isSelf,
+                    sender: sender,
+                    msgId: msgId,
                 };
-                messageBuffer[sender] = entry;
+                messageBuffer[key] = entry;
             }
 
             // ---- WebSocket ----
@@ -1835,17 +2052,51 @@
                         let data;
                         try { data = JSON.parse(event.data); } catch (_) { data = { message: event.data }; }
 
+                        if (data.type) {
+                            switch (data.type) {
+                                case 'tool_call': {
+                                    const name = data.name || 'unknown';
+                                    const args = data.args || {};
+                                    addToolCallMessage(name, args);
+                                    return;
+                                }
+                                case 'token': {
+                                    const text = data.content || '';
+                                    const msgId = data.message_id || null;
+                                    bufferMessage('assistant', text, false, msgId);
+                                    return;
+                                }
+                                case 'done': {
+                                    const doneMsgId = data.message_id || null;
+                                    if (doneMsgId && messageBuffer[doneMsgId]) {
+                                        flushBuffer(doneMsgId);
+                                    } else {
+                                        Object.keys(messageBuffer).forEach(key => flushBuffer(key));
+                                    }
+                                    addSystemMessage('✅ پردازش کامل شد.');
+                                    return;
+                                }
+                                default: {
+                                    break;
+                                }
+                            }
+                        }
+
+                        // fallback
                         const text = data.message || data.text || data.content || event.data;
-                        const sender = data.username || data.sender || 'کاربر';
+                        let sender = data.username || data.sender || 'کاربر';
+                        if (data.sender === 'assistant' || data.username === 'assistant') {
+                            sender = 'assistant';
+                        }
                         const isSelf = sender === currentUser?.username;
-                        const msgId = data.id || data.msgId || null;
+                        const msgId = data.id || data.message_id || data.msgId || null;
 
                         if (isSelf && msgId && displayedSelfMessages.has(msgId)) {
                             displayedSelfMessages.delete(msgId);
                             return;
                         }
 
-                        bufferMessage(sender, text, isSelf);
+                        bufferMessage(sender, text, isSelf, msgId);
                     };
 
                     ws.onclose = () => {
@@ -1899,7 +2150,6 @@
             //  INIT
             // ============================================================
             function init() {
-                // auto-login
                 const token = localStorage.getItem('token');
                 if (token) {
                     const storedUser = localStorage.getItem('user');
@@ -1921,7 +2171,6 @@
                     updateAuthUI();
                 }
 
-                // event listeners
                 loginForm.addEventListener('submit', handleLogin);
                 signupForm.addEventListener('submit', handleSignup);
                 logoutBtn.addEventListener('click', handleLogout);
@@ -1937,7 +2186,6 @@
                 loadAssets();
 
                 if (currentUser) {
-                    // If tickets page is active on load, load tickets
                     if (document.querySelector('#page-tickets.active')) {
                         loadTickets();
                     }
@@ -1962,7 +2210,6 @@
                     if (assetRefreshInterval) clearInterval(assetRefreshInterval);
                 });
 
-                // Keep currentUser in sync with localStorage
                 Object.defineProperty(window, 'currentUser', {
                     get: () => currentUser,
                     set: (val) => {
