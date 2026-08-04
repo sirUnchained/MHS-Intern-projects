@@ -10,6 +10,7 @@ from src.api.chat_router import router as chat_router
 from src.api.ticket_router import router as ticket_router
 from src.api.data_router import router as data_router
 from src.api.feedback_router import router as feedback_router
+from src.api.thread_router import router as thread_router
 
 from dotenv import load_dotenv
 
@@ -56,6 +57,7 @@ app.include_router(chat_router)
 app.include_router(ticket_router)
 app.include_router(data_router)
 app.include_router(feedback_router)
+app.include_router(thread_router)
 
 
 @app.get("/health")

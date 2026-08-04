@@ -13,16 +13,17 @@ async def get_graph():
     return _graph
 
 
-async def chat_stream(q: str, user_id: str):
+async def chat_stream(q: str, user_id: str, thread_id: str):
     """Async generator yielding structured chunks for a websocket to forward."""
 
     settings = get_settings()
     if settings.USE_PROXY:
+        print("[INFO] proxy is set")
         os.environ["http_proxy"] = settings.PROXY_LINK
         os.environ["https_proxy"] = settings.PROXY_LINK
 
     graph = await get_graph()
-    config = {"configurable": {"thread_id": user_id}}
+    config = {"configurable": {"thread_id": thread_id}}
 
     async for msg_chunk, metadata in graph.astream(
         input={"messages": [HumanMessage(content=q)], "user_id": user_id},

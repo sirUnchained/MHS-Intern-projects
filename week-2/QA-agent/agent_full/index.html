@@ -427,7 +427,95 @@
         }
 
         /* ===== Chat ===== */
+        .chat-layout {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .chat-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: var(--primary-card);
+            border: 1px solid var(--primary-border);
+            border-radius: 16px;
+            padding: 16px;
+            height: 520px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .chat-thread-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-thread-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chat-thread-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .chat-thread-item.active {
+            border-color: var(--accent-gold);
+            background: rgba(240, 185, 11, 0.1);
+        }
+
+        .chat-thread-item .thread-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-thread-item .thread-title {
+            color: var(--text-light);
+            font-size: 0.88rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        .chat-thread-item .thread-date {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .chat-thread-item .thread-delete-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chat-thread-item .thread-delete-btn:hover {
+            color: #ff5252;
+            background: rgba(255, 82, 82, 0.1);
+        }
+
         .chat-container {
+            flex: 1;
+            min-width: 0;
             background: var(--primary-card);
             border: 1px solid var(--primary-border);
             border-radius: 16px;
@@ -792,6 +880,15 @@
                 font-size: 1.4rem;
             }
 
+            .chat-layout {
+                flex-direction: column;
+            }
+
+            .chat-sidebar {
+                width: 100%;
+                height: 200px;
+            }
+
             .chat-container {
                 height: 400px;
             }
@@ -1137,23 +1234,36 @@
                 </span>
             </div>
 
-            <div class="chat-container">
-                <div class="chat-header">
-                    <div>
-                        <i class="fas fa-users text-gold me-2"></i>
-                        <span>گفتگوی گروهی</span>
-                    </div>
-                    <div class="status">
-                        <span class="dot offline" id="chatDot"></span>
-                        <span id="chatStatusText">اتصال...</span>
+            <div class="chat-layout">
+                <!-- ===== Threads Sidebar ===== -->
+                <div class="chat-sidebar">
+                    <button class="btn btn-gold w-100 mb-3" id="newChatBtn">
+                        <i class="fas fa-plus"></i> چت جدید
+                    </button>
+                    <div class="chat-thread-list" id="chatThreadList">
+                        <div class="text-center text-muted small py-3">برای دیدن چت‌های خود وارد شوید.</div>
                     </div>
                 </div>
-                <div class="chat-messages" id="chatMessages">
-                    <div class="system-msg">به چت خوش آمدید! منتظر پیام‌ها باشید...</div>
-                </div>
-                <div class="chat-input-area">
-                    <input type="text" id="chatInput" placeholder="پیام خود را بنویسید..." disabled />
-                    <button id="chatSendBtn" disabled><i class="fas fa-paper-plane"></i> ارسال</button>
+
+                <!-- ===== Active Chat ===== -->
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div>
+                            <i class="fas fa-comment text-gold me-2"></i>
+                            <span id="chatThreadTitle">یک چت را انتخاب کنید</span>
+                        </div>
+                        <div class="status">
+                            <span class="dot offline" id="chatDot"></span>
+                            <span id="chatStatusText">اتصال...</span>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="system-msg">یک چت را انتخاب کنید یا با دکمه «چت جدید» یکی بسازید.</div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" placeholder="پیام خود را بنویسید..." disabled />
+                        <button id="chatSendBtn" disabled><i class="fas fa-paper-plane"></i> ارسال</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1209,8 +1319,10 @@
             let wsConnected = false;
             let chatReconnectTimer = null;
             let assetRefreshInterval = null;
-            // thread_id برای feedback (فعلاً ثابت)
-            const THREAD_ID = 'global';
+
+            // ---- Multi-thread chat state ----
+            let threads = [];
+            let currentThreadId = null;
 
             // ---- Message buffering for streaming responses ----
             const messageBuffer = {};
@@ -1270,6 +1382,9 @@
             const chatStatusBadge = $('#chatStatusBadge');
             const chatDot = $('#chatDot');
             const chatStatusText = $('#chatStatusText');
+            const chatThreadList = $('#chatThreadList');
+            const chatThreadTitle = $('#chatThreadTitle');
+            const newChatBtn = $('#newChatBtn');
 
             const spinner = $('#spinnerOverlay');
             const toastContainer = $('#toastContainer');
@@ -1320,8 +1435,8 @@
                 if (pageId === 'admin' && currentUser) {
                     // nothing
                 }
-                if (pageId === 'chat') {
-                    connectWebSocket();
+                if (pageId === 'chat' && currentUser) {
+                    loadThreads();
                 }
             }
 
@@ -1329,7 +1444,7 @@
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const page = link.dataset.page;
-                    if ((page === 'tickets' || page === 'admin') && !currentUser) {
+                    if ((page === 'tickets' || page === 'admin' || page === 'chat') && !currentUser) {
                         showToast('لطفاً ابتدا وارد شوید.', 'error');
                         navigateTo('login');
                         return;
@@ -1492,11 +1607,9 @@
             function handleLogout() {
                 localStorage.removeItem('token');
                 currentUser = null;
-                if (ws) {
-                    try { ws.close(); } catch (_) { }
-                    ws = null;
-                    wsConnected = false;
-                }
+                disconnectWebSocket();
+                threads = [];
+                currentThreadId = null;
                 updateAuthUI();
                 showToast('شما خارج شدید.', 'info');
                 navigateTo('dashboard');
@@ -1801,14 +1914,181 @@
             refreshTicketsBtn.addEventListener('click', loadTickets);
 
             // ============================================================
-            //  FEEDBACK (updated to /chat/feedback with thread_id)
+            //  CHAT THREADS (list / create / delete / select)
+            // ============================================================
+            async function loadThreads(selectThreadIdAfter = null) {
+                if (!currentUser) return;
+
+                chatThreadList.innerHTML =
+                    `<div class="text-center text-muted small py-3"><i class="fas fa-spinner fa-spin me-1"></i>در حال بارگذاری...</div>`;
+
+                try {
+                    const data = await apiFetch('/chat/threads');
+                    threads = Array.isArray(data) ? data : [];
+                    renderThreadList();
+
+                    if (selectThreadIdAfter) {
+                        selectThread(selectThreadIdAfter);
+                    } else if (currentThreadId && threads.some(t => t.thread_id === currentThreadId)) {
+                        renderThreadList(); // just refresh active highlight
+                    } else if (threads.length > 0) {
+                        selectThread(threads[0].thread_id);
+                    } else {
+                        currentThreadId = null;
+                        chatThreadTitle.textContent = 'یک چت را انتخاب کنید';
+                        chatMessages.innerHTML =
+                            `<div class="system-msg">هنوز چتی ندارید. با دکمه «چت جدید» شروع کنید.</div>`;
+                        disconnectWebSocket();
+                        chatInput.disabled = true;
+                        chatSendBtn.disabled = true;
+                    }
+                } catch (err) {
+                    chatThreadList.innerHTML =
+                        `<div class="text-center text-danger small py-3">خطا در بارگذاری چت‌ها</div>`;
+                    showToast('خطا در دریافت لیست چت‌ها: ' + err.message, 'error');
+                }
+            }
+
+            function renderThreadList() {
+                if (threads.length === 0) {
+                    chatThreadList.innerHTML =
+                        `<div class="text-center text-muted small py-3">هنوز چتی ندارید.</div>`;
+                    return;
+                }
+
+                chatThreadList.innerHTML = '';
+                threads.forEach(t => {
+                    const item = document.createElement('div');
+                    item.className = `chat-thread-item${t.thread_id === currentThreadId ? ' active' : ''}`;
+                    item.dataset.threadId = t.thread_id;
+
+                    const date = t.created_at ? new Date(t.created_at).toLocaleDateString('fa-IR') : '';
+
+                    item.innerHTML = `
+                        <div class="thread-info">
+                            <span class="thread-title">${t.title || 'چت بدون عنوان'}</span>
+                            <span class="thread-date">${date}</span>
+                        </div>
+                        <button class="thread-delete-btn" title="حذف چت"><i class="fas fa-trash-alt"></i></button>
+                    `;
+
+                    item.querySelector('.thread-info').addEventListener('click', () => {
+                        if (t.thread_id !== currentThreadId) {
+                            selectThread(t.thread_id);
+                        }
+                    });
+
+                    item.querySelector('.thread-delete-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm(`آیا چت "${t.title || 'بدون عنوان'}" حذف شود؟`)) {
+                            deleteThread(t.thread_id);
+                        }
+                    });
+
+                    chatThreadList.appendChild(item);
+                });
+            }
+
+            async function createNewThread() {
+                if (!currentUser) {
+                    showToast('لطفاً ابتدا وارد شوید.', 'error');
+                    return;
+                }
+                showSpinner(true);
+                try {
+                    const thread = await apiFetch('/chat/threads', {
+                        method: 'POST',
+                        body: JSON.stringify({ title: 'چت جدید' }),
+                    });
+                    showToast('چت جدید ایجاد شد.', 'success');
+                    await loadThreads(thread.thread_id);
+                } catch (err) {
+                    showToast('خطا در ایجاد چت: ' + err.message, 'error');
+                } finally {
+                    showSpinner(false);
+                }
+            }
+
+            async function deleteThread(threadId) {
+                showSpinner(true);
+                try {
+                    await apiFetch(`/chat/threads/${threadId}`, { method: 'DELETE' });
+                    showToast('چت حذف شد.', 'success');
+
+                    const wasActive = threadId === currentThreadId;
+                    if (wasActive) {
+                        disconnectWebSocket();
+                        currentThreadId = null;
+                    }
+                    await loadThreads();
+                } catch (err) {
+                    showToast('خطا در حذف چت: ' + err.message, 'error');
+                } finally {
+                    showSpinner(false);
+                }
+            }
+
+            async function selectThread(threadId) {
+                if (currentThreadId === threadId && ws && ws.readyState === WebSocket.OPEN) {
+                    return;
+                }
+
+                disconnectWebSocket();
+                currentThreadId = threadId;
+                Object.keys(messageBuffer).forEach(key => {
+                    clearTimeout(messageBuffer[key].timer);
+                    delete messageBuffer[key];
+                });
+
+                const thread = threads.find(t => t.thread_id === threadId);
+                chatThreadTitle.textContent = thread ? (thread.title || 'چت بدون عنوان') : 'چت';
+                renderThreadList();
+
+                chatMessages.innerHTML =
+                    `<div class="system-msg"><i class="fas fa-spinner fa-spin me-1"></i>در حال بارگذاری تاریخچه...</div>`;
+
+                try {
+                    const history = await apiFetch(`/chat/threads/${threadId}/messages`);
+                    renderThreadHistory(Array.isArray(history) ? history : []);
+                } catch (err) {
+                    chatMessages.innerHTML =
+                        `<div class="system-msg text-danger">خطا در بارگذاری تاریخچه چت</div>`;
+                }
+
+                connectWebSocket();
+            }
+
+            function renderThreadHistory(messages) {
+                chatMessages.innerHTML = '';
+                if (messages.length === 0) {
+                    addSystemMessage('پیامی وجود ندارد. اولین پیام خود را بفرستید!');
+                    return;
+                }
+                messages.forEach(m => {
+                    const isSelf = m.type === 'human';
+                    const sender = isSelf ? (currentUser?.username || 'کاربر') : 'assistant';
+                    if (!m.content) return;
+                    const container = addChatMessage(m.content, sender, isSelf, m.id);
+                    if (!isSelf && m.id) {
+                        addFeedbackButtons(container, m.id);
+                    }
+                });
+            }
+
+            newChatBtn.addEventListener('click', createNewThread);
+
+            // ============================================================
+            //  FEEDBACK (uses currentThreadId)
             // ============================================================
             async function sendFeedback(messageId, rating) {
                 if (!currentUser) {
                     throw new Error('لطفاً وارد شوید.');
                 }
+                if (!currentThreadId) {
+                    throw new Error('چتی انتخاب نشده است.');
+                }
                 const payload = {
-                    thread_id: THREAD_ID,
+                    thread_id: currentThreadId,
                     message_id: messageId,
                     rating: rating, // 1 or -1
                     comment: null,
@@ -2011,7 +2291,25 @@
             }
 
             // ---- WebSocket ----
+            function disconnectWebSocket() {
+                if (ws) {
+                    try { ws.close(); } catch (_) { }
+                    ws = null;
+                }
+                wsConnected = false;
+                if (chatReconnectTimer) {
+                    clearTimeout(chatReconnectTimer);
+                    chatReconnectTimer = null;
+                }
+                setChatStatus(false);
+                chatInput.disabled = true;
+                chatSendBtn.disabled = true;
+            }
+
             function connectWebSocket() {
+                if (!currentThreadId) {
+                    return;
+                }
                 if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
                     return;
                 }
@@ -2030,18 +2328,23 @@
                     return;
                 }
 
+                const threadIdAtConnect = currentThreadId;
                 setChatStatus(false, 'در حال اتصال...');
                 try {
-                    const wsUrl = `${WS_URL}?token=${encodeURIComponent(token)}`;
+                    const wsUrl = `${WS_URL}?token=${encodeURIComponent(token)}&thread_id=${encodeURIComponent(threadIdAtConnect)}`;
                     ws = new WebSocket(wsUrl);
 
                     ws.onopen = () => {
+                        // Ignore stale sockets from a thread the user already switched away from
+                        if (currentThreadId !== threadIdAtConnect) {
+                            try { ws.close(); } catch (_) { }
+                            return;
+                        }
                         wsConnected = true;
                         setChatStatus(true);
                         chatInput.disabled = false;
                         chatSendBtn.disabled = false;
                         chatInput.placeholder = 'پیام خود را بنویسید...';
-                        addSystemMessage('به چت متصل شدید!');
                         if (chatReconnectTimer) {
                             clearTimeout(chatReconnectTimer);
                             chatReconnectTimer = null;
@@ -2049,6 +2352,8 @@
                     };
 
                     ws.onmessage = (event) => {
+                        if (currentThreadId !== threadIdAtConnect) return;
+
                         let data;
                         try { data = JSON.parse(event.data); } catch (_) { data = { message: event.data }; }
 
@@ -2073,7 +2378,6 @@
                                     } else {
                                         Object.keys(messageBuffer).forEach(key => flushBuffer(key));
                                     }
-                                    addSystemMessage('✅ پردازش کامل شد.');
                                     return;
                                 }
                                 default: {
@@ -2100,14 +2404,14 @@
                     };
 
                     ws.onclose = () => {
+                        if (currentThreadId !== threadIdAtConnect) return;
                         wsConnected = false;
                         setChatStatus(false);
                         chatInput.disabled = true;
                         chatSendBtn.disabled = true;
-                        addSystemMessage('اتصال قطع شد. تلاش برای اتصال مجدد...');
                         if (chatReconnectTimer) clearTimeout(chatReconnectTimer);
                         chatReconnectTimer = setTimeout(() => {
-                            if (currentUser) connectWebSocket();
+                            if (currentUser && currentThreadId === threadIdAtConnect) connectWebSocket();
                         }, 3000);
                     };
 
@@ -2124,6 +2428,10 @@
 
             function sendChatMessage() {
                 const text = chatInput.value.trim();
+                if (!currentThreadId) {
+                    showToast('لطفاً ابتدا یک چت انتخاب کنید یا بسازید.', 'error');
+                    return;
+                }
                 if (!text || !ws || ws.readyState !== WebSocket.OPEN) {
                     if (!currentUser) showToast('لطفاً وارد شوید.', 'error');
                     else showToast('اتصال به سرور برقرار نیست.', 'error');
@@ -2190,7 +2498,7 @@
                         loadTickets();
                     }
                     if (document.querySelector('#page-chat.active')) {
-                        connectWebSocket();
+                        loadThreads();
                     }
                 }
 
@@ -2199,7 +2507,7 @@
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden) {
                         const chatActive = document.querySelector('#page-chat.active');
-                        if (chatActive && currentUser) {
+                        if (chatActive && currentUser && currentThreadId) {
                             connectWebSocket();
                         }
                     }
