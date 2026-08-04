@@ -7,6 +7,7 @@ _graph = None
 
 
 async def get_graph():
+    """Get the graph! Note that this is an async function"""
     global _graph
     if _graph is None:
         _graph = await build_graph()

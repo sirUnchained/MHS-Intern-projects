@@ -426,6 +426,22 @@
             color: #fff;
         }
 
+        .btn-delete-ticket {
+            background: rgba(255, 0, 0, 0.15);
+            color: #ff4444;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            margin-right: 4px;
+        }
+
+        .btn-delete-ticket:hover {
+            background: #ff4444;
+            color: #fff;
+        }
+
         /* ===== Chat ===== */
         .chat-layout {
             display: flex;
@@ -1837,7 +1853,10 @@
                             <td>${date}</td>
                             <td>${user}</td>
                             <td>
-                                ${isAdmin ? `<button class="btn-close-ticket" data-id="${t.id}" data-title="${title}">بستن</button>` : '—'}
+                                ${isAdmin ? `
+                                    <button class="btn-close-ticket" data-id="${t.id}" data-title="${title}">بستن</button>
+                                    <button class="btn-delete-ticket" data-id="${t.id}" data-title="${title}"><i class="fas fa-trash-alt"></i> حذف</button>
+                                ` : '—'}
                             </td>
                         `;
                         ticketsBody.appendChild(tr);
@@ -1849,6 +1868,16 @@
                             const title = btn.dataset.title;
                             if (confirm(`آیا تیکت "${title}" را می‌بندید؟`)) {
                                 await closeTicket(id);
+                            }
+                        });
+                    });
+
+                    document.querySelectorAll('.btn-delete-ticket').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const id = btn.dataset.id;
+                            const title = btn.dataset.title;
+                            if (confirm(`آیا تیکت "${title}" را برای همیشه حذف می‌کنید؟`)) {
+                                await deleteTicket(id);
                             }
                         });
                     });
@@ -1894,6 +1923,21 @@
                     loadTickets();
                 } catch (err) {
                     showToast('خطا در بستن تیکت: ' + err.message, 'error');
+                } finally {
+                    showSpinner(false);
+                }
+            }
+
+            async function deleteTicket(id) {
+                showSpinner(true);
+                try {
+                    await apiFetch(`/admin/tickets/${id}`, {
+                        method: 'DELETE',
+                    });
+                    showToast('تیکت با موفقیت حذف شد!', 'success');
+                    loadTickets();
+                } catch (err) {
+                    showToast('خطا در حذف تیکت: ' + err.message, 'error');
                 } finally {
                     showSpinner(false);
                 }

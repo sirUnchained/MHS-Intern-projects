@@ -1,11 +1,9 @@
 import enum
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, Enum
-from sqlalchemy.ext.declarative import declarative_base
 
+from src.database.base import Base
 from src.database.engine import get_engine
-
-Base = declarative_base()
 
 
 class UserRole(str, enum.Enum):
