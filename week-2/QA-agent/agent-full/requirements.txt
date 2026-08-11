@@ -16,7 +16,6 @@ arize-phoenix==19.3.0
 arize-phoenix-client==2.13.0
 arize-phoenix-evals==3.1.1
 arize-phoenix-otel==0.16.1
-arxiv==4.0.1
 asttokens==3.0.1
 asyncpg==0.31.0
 attrs==26.1.0
@@ -43,9 +42,6 @@ comm==0.2.3
 contourpy==1.3.3
 cross-web==0.7.0
 cryptography==48.0.1
-cuda-bindings==13.3.1
-cuda-pathfinder==1.5.6
-cuda-toolkit==13.0.3.0
 curl_cffi==0.15.0
 cycler==0.12.1
 cyclopts==4.22.1
@@ -169,7 +165,6 @@ langchain-huggingface==1.2.2
 langchain-openai==1.2.1
 langchain-postgres==0.0.17
 langchain-protocol==0.0.18
-langchain-qdrant==1.1.0
 langchain-tavily==0.2.18
 langchain-text-splitters==1.1.2
 langchainhub==0.1.21
@@ -236,8 +231,6 @@ peewee==4.1.0
 pexpect==4.9.0
 pgvector==0.3.6
 pillow==12.2.0
-pinecone-client==6.0.0
-pinecone-plugin-interface==0.0.7
 platformdirs==4.9.6
 polars==1.42.1
 polars-runtime-32==1.42.1
@@ -286,7 +279,6 @@ python-multipart==0.0.32
 pytz==2026.2
 PyYAML==6.0.3
 pyzmq==27.1.0
-qdrant-client==1.18.0
 rank-bm25==0.2.2
 referencing==0.37.0
 regex==2026.4.4
@@ -330,7 +322,6 @@ timesfm==2.0.1
 tokenizers==0.22.2
 toml==0.10.2
 tornado==6.5.5
-tqdm==4.67.3
 traitlets==5.14.3
 transformers==5.14.1
 trio==0.33.0
