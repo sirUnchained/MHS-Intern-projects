@@ -1,7 +1,7 @@
 window.Mana = window.Mana || {};
 
-Mana.BASE_URL = 'http://127.0.0.1:8000';
-Mana.WS_URL = 'ws://127.0.0.1:8000/chat/ws/chat';
+Mana.BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:8000';
+Mana.WS_URL = process.env.WS_URL || 'ws://127.0.0.1:8000/chat/ws/chat';
 
 Mana.ASSETS = {
     gold: { label: 'طلای جهانی', icon: 'fa-coins' },
