@@ -9,6 +9,19 @@ def read(
     table_name: str,
     columns: Optional[list] = None,
 ) -> pd.DataFrame:
+    """
+    Read data from database table, excluding vector embedding column.
+
+    Args:
+        engine: SQLAlchemy database engine.
+        table_name: Name of the table to read from.
+        columns: Optional list of specific column names to select.
+            If None, reads all columns except 'embedding'.
+
+    Returns:
+        DataFrame with date as index, or empty DataFrame if read fails.
+    """
+
     try:
         if columns is None:
             with engine.connect() as conn:

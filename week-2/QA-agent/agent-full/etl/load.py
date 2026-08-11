@@ -11,6 +11,17 @@ def load(
     if_exists: Literal["fail", "replace", "append"] = "fail",
     add_vector_column: bool = True,
 ) -> None:
+    """
+    Load DataFrame to database table.
+
+    Args:
+        data: DataFrame to write to database.
+        engine: SQLAlchemy database engine.
+        table_name: Target table name.
+        if_exists: How to handle existing table: 'fail', 'replace', or 'append'.
+        add_vector_column: If True, adds an 'embedding' vector column for ML use.
+    """
+
     if data.empty:
         print("Empty DataFrame — nothing written.")
         return
