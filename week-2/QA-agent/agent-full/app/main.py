@@ -1,25 +1,35 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
 from app.features.auth.models import migrate as migrate_users
 from app.features.chat_threads.models import migrate as migrate_chat_threads
 from app.features.tickets.models import migrate as migrate_tickets
 from app.features.feedback.models import migrate as migrate_feedbacks
 
-from app.features.auth.router import router as auth_router  # danger
-
+from app.features.auth.router import router as auth_router
 from app.features.uploads.router import router as upload_router
 from app.features.chat_threads.router import router as chat_router
 from app.features.tickets.router import router as ticket_router
 from app.features.market_data.router import router as data_router
 from app.features.feedback.router import router as feedback_router
 
-from dotenv import load_dotenv
+import os
+from app.core.config import get_settings
 
 load_dotenv()
 
+# ======================== PROXY =========================
+settings = get_settings()
+if settings.USE_PROXY:
+    print("[INFO] proxy is set")
+    os.environ["http_proxy"] = settings.PROXY_LINK
+    os.environ["https_proxy"] = settings.PROXY_LINK
+# =======================================================
 
+
+# ======================== MIGRATION =========================
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     migrate_users()
@@ -29,6 +39,10 @@ async def lifespan(app: FastAPI):
     yield
 
 
+# =======================================================
+
+
+# ======================== APP =========================
 app = FastAPI(
     title="QA-agent backend",
     description=(
@@ -39,6 +53,8 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+# =======================================================
+
 
 # ======================== CORS =========================
 app.add_middleware(
@@ -48,9 +64,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# =================================================================
+# =======================================================
 
 
+# ======================== ROUTES =========================
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -67,3 +84,6 @@ app.include_router(feedback_router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# =======================================================

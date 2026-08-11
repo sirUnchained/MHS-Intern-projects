@@ -17,12 +17,6 @@ async def get_graph():
 async def chat_stream(q: str, user_id: str, thread_id: str):
     """Async generator yielding structured chunks for a websocket to forward."""
 
-    settings = get_settings()
-    if settings.USE_PROXY:
-        print("[INFO] proxy is set")
-        os.environ["http_proxy"] = settings.PROXY_LINK
-        os.environ["https_proxy"] = settings.PROXY_LINK
-
     graph = await get_graph()
     config = {"configurable": {"thread_id": thread_id}}
 

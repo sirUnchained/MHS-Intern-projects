@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مانا | دستیار تحلیل بازار طلا</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Vazirmatn:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #0b0d12;
+            --surface: #12151d;
+            --surface-2: #171b26;
+            --border: #262b3a;
+            --gold: #b58a34;
+            --gold-bright: #d9ac4e;
+            --text: #e7e9ee;
+            --text-muted: #8991a6;
+            --green: #4caf82;
+            --red: #d1615d;
+            --blue: #5b8def;
+            --font-display: 'Fraunces', 'Vazirmatn', serif;
+            --font-body: 'Vazirmatn', 'Inter', sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            padding-top: 94px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
+        }
+
+        /* Ticker tape */
+        .ticker-tape {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: 34px;
+            background: #000;
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker-track {
+            display: flex;
+            white-space: nowrap;
+            animation: tickerScroll 38s linear infinite;
+            direction: ltr;
+        }
+
+        .ticker-tape:hover .ticker-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes tickerScroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .ticker-item {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            padding: 0 22px;
+            color: var(--text-muted);
+            border-left: 1px solid #1c2030;
+            letter-spacing: 0.3px;
+        }
+
+        .ticker-item b {
+            color: var(--text);
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .ticker-item .up {
+            color: var(--green);
+        }
+
+        .ticker-item .down {
+            color: var(--red);
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: rgba(11, 13, 18, 0.94);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            position: fixed;
+            top: 34px;
+            width: 100%;
+            z-index: 1050;
+        }
+
+        .navbar-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand {
+            font-family: var(--font-display);
+            color: var(--gold-bright);
+            font-weight: 700;
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand small {
+            display: block;
+            font-family: var(--font-body);
+            font-size: 0.62rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-link {
+            color: var(--text-muted) !important;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all .2s;
+            text-decoration: none;
+            font-size: 0.92rem;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #fff !important;
+            background: rgba(181, 138, 52, 0.16);
+        }
+
+        .btn-outline-gold {
+            color: var(--gold-bright);
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            padding: 7px 20px;
+            font-weight: 600;
+            background: transparent;
+            transition: all .2s;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .btn-outline-gold:hover {
+            background: var(--gold);
+            color: #0b0d12;
+        }
+
+        .btn-gold {
+            background: var(--gold);
+            color: #0b0d12;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-weight: 700;
+            transition: all .2s;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .btn-gold:hover {
+            background: var(--gold-bright);
+        }
+
+        .btn-gold:disabled,
+        .btn-outline-gold:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px 16px 5px 6px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: #0b0d12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-family: var(--font-display);
+        }
+
+        .role-tag {
+            font-size: 0.65rem;
+            color: var(--gold-bright);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .logout-btn:hover {
+            color: var(--red);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Layout */
+        .main-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 28px 24px 60px;
+        }
+
+        .page {
+            display: none;
+            animation: fadeUp .35s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 26px;
+        }
+
+        .eyebrow {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin: 0 0 6px;
+        }
+
+        .page-title {
+            font-family: var(--font-display);
+            font-size: 1.9rem;
+            font-weight: 600;
+            margin: 0;
+            color: #fff;
+        }
+
+        .page-sub {
+            color: var(--text-muted);
+            margin: 6px 0 0;
+            font-size: 0.92rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .grid-assets {
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        }
+
+        .asset-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .asset-card .asset-label {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .asset-card .asset-price {
+            font-family: var(--font-mono);
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 6px;
+        }
+
+        .asset-card .asset-change {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            padding: 3px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.82rem;
+            margin-top: 10px;
+        }
+
+        .asset-change.pos {
+            background: rgba(76, 175, 130, 0.15);
+            color: var(--green);
+        }
+
+        .asset-change.neg {
+            background: rgba(209, 97, 93, 0.15);
+            color: var(--red);
+        }
+
+        .asset-card .asset-date {
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            margin-top: 8px;
+            font-family: var(--font-mono);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 50px 20px;
+            font-size: 0.95rem;
+        }
+
+        .empty-state i {
+            font-size: 1.8rem;
+            color: var(--gold);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Forms */
+        .auth-form {
+            max-width: 420px;
+            margin: 20px auto;
+            padding: 38px 34px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .auth-form .form-title {
+            font-family: var(--font-display);
+            text-align: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+        }
+
+        .auth-form .form-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 0.88rem;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            margin-bottom: 6px;
+        }
+
+        .field input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: #fff;
+            border-radius: 9px;
+            padding: 11px 15px;
+            font-family: var(--font-body);
+            font-size: 0.92rem;
+            transition: all .2s;
+        }
+
+        .field input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(181, 138, 52, 0.15);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 18px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .form-footer a {
+            color: var(--gold-bright);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .notice {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(181, 138, 52, 0.08);
+            border: 1px solid rgba(181, 138, 52, 0.25);
+            border-radius: 9px;
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            line-height: 1.7;
+        }
+
+        /* Tables */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        table.data-table thead th {
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+            padding: 12px 10px;
+            text-align: right;
+        }
+
+        table.data-table tbody td {
+            border-bottom: 1px solid rgba(38, 43, 58, 0.6);
+            padding: 12px 10px;
+            vertical-align: middle;
+        }
+
+        .btn-danger-sm {
+            background: rgba(209, 97, 93, 0.15);
+            color: var(--red);
+            border: 1px solid rgba(209, 97, 93, 0.3);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .btn-danger-sm:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        /* Upload */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 46px 20px;
+            text-align: center;
+            transition: all .2s;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .upload-area:hover,
+        .upload-area.drag {
+            border-color: var(--gold);
+            background: rgba(181, 138, 52, 0.05);
+        }
+
+        .upload-area i {
+            font-size: 2.6rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .upload-area p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.88rem;
+        }
+
+        .file-name {
+            color: var(--gold-bright);
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        /* Chat */
+        .chat-layout {
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+
+        .chat-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-sidebar h6 {
+            font-family: var(--font-display);
+            color: var(--gold-bright);
+            margin: 0 0 12px;
+            font-size: 1rem;
+        }
+
+        .new-thread-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .new-thread-area input {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #fff;
+            font-family: var(--font-body);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .new-thread-area .btn-gold {
+            width: 100%;
+            padding: 8px 12px;
+            white-space: nowrap;
+        }
+
+        .thread-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .thread-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .thread-item:hover {
+            border-color: var(--gold);
+            background: rgba(181, 138, 52, 0.07);
+        }
+
+        .thread-item.active {
+            border-color: var(--gold-bright);
+            background: rgba(181, 138, 52, 0.12);
+        }
+
+        .thread-item .thread-title {
+            font-weight: 500;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .thread-item .thread-date {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin-right: 8px;
+        }
+
+        .thread-item .delete-thread-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 2px 6px;
+            transition: color 0.2s;
+        }
+
+        .thread-item .delete-thread-btn:hover {
+            color: var(--red);
+        }
+
+        .chat-container {
+            flex: 1;
+            min-width: 280px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            height: 560px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .chat-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .chat-header .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot.online {
+            background: var(--green);
+            box-shadow: 0 0 10px rgba(76, 175, 130, 0.5);
+        }
+
+        .dot.offline {
+            background: var(--red);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .msg {
+            padding: 10px 16px;
+            border-radius: 12px;
+            max-width: 85%;
+            word-wrap: break-word;
+            font-size: 0.92rem;
+            animation: fadeUp .2s ease;
+        }
+
+        .msg.self {
+            align-self: flex-end;
+            background: var(--gold);
+            color: #0b0d12;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg.other {
+            align-self: flex-start;
+            background: var(--surface-2);
+            color: var(--text);
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg .msg-meta {
+            font-size: 0.68rem;
+            opacity: 0.6;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .msg .markdown-body {
+            font-size: 0.92rem;
+            line-height: 1.65;
+        }
+
+        .msg .markdown-body code {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+        }
+
+        /* Markdown table styles */
+        .markdown-body table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 12px 0;
+            font-size: 0.85rem;
+        }
+
+        .markdown-body th,
+        .markdown-body td {
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            text-align: right;
+        }
+
+        .markdown-body th {
+            background: rgba(181, 138, 52, 0.12);
+            color: var(--gold-bright);
+            font-weight: 600;
+        }
+
+        .markdown-body blockquote {
+            border-right: 3px solid var(--gold);
+            padding: 6px 14px;
+            margin: 12px 0;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+        }
+
+        .system-msg {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            padding: 8px 0;
+        }
+
+        .tool-call-msg {
+            background: rgba(91, 141, 239, 0.08);
+            border: 1px solid var(--blue);
+            border-radius: 10px;
+            padding: 9px 14px;
+            margin: 2px 0;
+            color: var(--text);
+            font-size: 0.85rem;
+            align-self: flex-start;
+            max-width: 85%;
+        }
+
+        .tool-call-msg .tool-detail {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 4px;
+            font-family: var(--font-mono);
+            background: rgba(0, 0, 0, 0.25);
+            padding: 5px 10px;
+            border-radius: 6px;
+            display: block;
+            white-space: pre-wrap;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .fb-btn {
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            background: transparent;
+            transition: all .2s;
+        }
+
+        .fb-btn.like {
+            color: var(--green);
+            border: 1px solid var(--green);
+        }
+
+        .fb-btn.like.active {
+            background: var(--green);
+            color: #0b0d12;
+        }
+
+        .fb-btn.dislike {
+            color: var(--red);
+            border: 1px solid var(--red);
+        }
+
+        .fb-btn.dislike.active {
+            background: var(--red);
+            color: #0b0d12;
+        }
+
+        .fb-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        .chat-input-area {
+            padding: 14px 18px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.015);
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 10px 16px;
+            color: #fff;
+            font-family: var(--font-body);
+        }
+
+        .chat-input-area input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        /* Thinking indicator */
+        .thinking-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            align-self: flex-start;
+            background: var(--surface-2);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .thinking-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .thinking-dots span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gold);
+            animation: blink 1.4s infinite ease-in-out both;
+        }
+
+        .thinking-dots span:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .thinking-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .thinking-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* Toasts */
+        .toast-container-custom {
+            position: fixed;
+            bottom: 26px;
+            left: 26px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-custom {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 13px 22px;
+            color: #fff;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            animation: slideUp .3s ease;
+            min-width: 260px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+        }
+
+        .toast-custom.success {
+            border-right: 4px solid var(--green);
+        }
+
+        .toast-custom.error {
+            border-right: 4px solid var(--red);
+        }
+
+        .toast-custom.info {
+            border-right: 4px solid var(--blue);
+        }
+
+        .toast-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-right: auto;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .spinner-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 13, 18, 0.72);
+            backdrop-filter: blur(3px);
+            z-index: 9998;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner-overlay.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 42px;
+            height: 42px;
+            border: 3px solid rgba(181, 138, 52, 0.25);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width:768px) {
+            body {
+                padding-top: 120px;
+            }
+
+            .navbar-custom {
+                top: 34px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .chat-layout {
+                flex-direction: column;
+            }
+
+            .chat-sidebar {
+                width: 100%;
+            }
+
+            .chat-container {
+                height: 440px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="spinner-overlay" id="spinnerOverlay">
+        <div class="spinner"></div>
+    </div>
+    <div class="toast-container-custom" id="toastContainer"></div>
+
+    <!-- Ticker tape -->
+    <div class="ticker-tape">
+        <div class="ticker-track" id="tickerTrack">
+            <span class="ticker-item">در حال دریافت قیمت‌ها…</span>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar-custom">
+        <div class="navbar-inner">
+            <a class="brand" href="#" data-page="dashboard">
+                <i class="fas fa-chart-line"></i>
+                <span>مانا<small>دستیار تحلیل بازار طلا</small></span>
+            </a>
+            <ul class="nav-links">
+                <li><a class="nav-link active" data-page="dashboard">داشبورد</a></li>
+                <li><a class="nav-link" data-page="chat">چت با دستیار</a></li>
+                <li><a class="nav-link admin-only hidden" data-page="tickets">تیکت‌ها</a></li>
+                <li><a class="nav-link admin-only hidden" data-page="admin">مدیریت</a></li>
+            </ul>
+            <div id="navAuth">
+                <div id="authButtons">
+                    <button class="btn-outline-gold" data-page="login">ورود</button>
+                    <button class="btn-gold" data-page="signup">ثبت‌نام</button>
+                </div>
+                <div id="userBadge" class="hidden">
+                    <div class="user-badge">
+                        <span class="avatar" id="userAvatar">U</span>
+                        <div>
+                            <div id="userNameDisplay" style="font-size:0.88rem;font-weight:600;">کاربر</div>
+                            <div class="role-tag" id="userRoleDisplay">user</div>
+                        </div>
+                        <button class="logout-btn" id="logoutBtn" title="خروج"><i
+                                class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+            <div class="page-head">
+                <div>
+                    <p class="eyebrow">Market Overview</p>
+                    <h2 class="page-title">داشبورد دارایی‌ها</h2>
+                    <p class="page-sub">قیمت‌های اخیر طلا، نقره، نفت، دلار و S&P 500 — برگرفته از
+                        <code>/data/&#123;asset&#125;</code>
+                    </p>
+                </div>
+                <button class="btn-outline-gold" id="refreshAssetsBtn"><i class="fas fa-sync-alt"></i>
+                    بروزرسانی</button>
+            </div>
+            <div id="assetsAuthNotice" class="notice hidden">
+                برای مشاهده داده‌های بازار باید وارد حساب کاربری خود شوید — این endpoint نیازمند JWT است.
+            </div>
+            <div class="grid grid-assets" id="assetCards">
+                <div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-spinner fa-spin"></i>در حال
+                    بارگذاری...</div>
+            </div>
+        </div>
+
+        <!-- LOGIN -->
+        <div class="page" id="page-login">
+            <div class="auth-form">
+                <h2 class="form-title">ورود</h2>
+                <p class="form-subtitle">برای دسترسی به داشبورد و چت وارد شوید</p>
+                <form id="loginForm">
+                    <div class="field"><label>نام کاربری</label><input type="text" id="loginUsername" required /></div>
+                    <div class="field"><label>رمز عبور</label><input type="password" id="loginPassword" required />
+                    </div>
+                    <button type="submit" class="btn-gold" style="width:100%;padding:12px;"><i
+                            class="fas fa-arrow-left"></i> ورود</button>
+                    <div class="form-footer">حساب کاربری ندارید؟ <a data-page="signup">ثبت‌نام کنید</a></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- SIGNUP -->
+        <div class="page" id="page-signup">
+            <div class="auth-form">
+                <h2 class="form-title">ثبت‌نام</h2>
+                <p class="form-subtitle">ایجاد حساب کاربری جدید</p>
+                <div class="notice">اولین حسابی که ساخته شود به‌طور خودکار نقش <b>ادمین</b> می‌گیرد؛ حساب‌های بعدی نقش
+                    عادی دارند.</div>
+                <form id="signupForm">
+                    <div class="field"><label>نام کاربری</label><input type="text" id="signupUsername" required /></div>
+                    <div class="field"><label>رمز عبور</label><input type="password" id="signupPassword" required />
+                    </div>
+                    <button type="submit" class="btn-gold" style="width:100%;padding:12px;"><i
+                            class="fas fa-user-check"></i> ثبت‌نام</button>
+                    <div class="form-footer">قبلاً ثبت‌نام کرده‌اید؟ <a data-page="login">وارد شوید</a></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TICKETS (admin) -->
+        <div class="page" id="page-tickets">
+            <div class="page-head">
+                <div>
+                    <p class="eyebrow">Support Escalations</p>
+                    <h2 class="page-title">تیکت‌ها</h2>
+                    <p class="page-sub">تیکت‌ها به‌صورت خودکار توسط دستیار هنگام ارجاع مکالمه ساخته می‌شوند؛ اینجا فقط
+                        قابل مشاهده و حذف‌اند.</p>
+                </div>
+                <button class="btn-outline-gold" id="refreshTicketsBtn"><i class="fas fa-sync-alt"></i>
+                    بروزرسانی</button>
+            </div>
+            <div class="card">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>موضوع</th>
+                                <th>ساختمان مسئول</th>
+                                <th>تلفن</th>
+                                <th>کاربر</th>
+                                <th>تاریخ</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticketsBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">در حال بارگذاری...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN -->
+        <div class="page" id="page-admin">
+            <div class="page-head">
+                <div>
+                    <p class="eyebrow">Knowledge Base</p>
+                    <h2 class="page-title">پنل مدیریت</h2>
+                    <p class="page-sub">آپلود فایل متنی (.txt / .md) برای پایگاه دانش RAG دستیار</p>
+                </div>
+            </div>
+            <div class="card">
+                <form id="uploadForm">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>برای آپلود، فایل را اینجا بکشید یا کلیک کنید</p>
+                        <p class="file-name" id="selectedFileName">هیچ فایلی انتخاب نشده (فقط txt/md)</p>
+                        <input type="file" id="fileInput" style="display:none;" accept=".txt,.md" />
+                    </div>
+                    <button type="submit" class="btn-gold mt-3" style="width:100%;padding:12px;margin-top:16px;"
+                        id="uploadBtn">
+                        <i class="fas fa-upload"></i> آپلود فایل
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- CHAT -->
+        <div class="page" id="page-chat">
+            <div class="page-head">
+                <div>
+                    <p class="eyebrow">Live Agent</p>
+                    <h2 class="page-title">چت با دستیار</h2>
+                    <p class="page-sub">مدیریت گفتگوها و چت زنده از طریق <code>/ws/chat</code></p>
+                </div>
+            </div>
+            <div class="chat-layout">
+                <!-- Sidebar with thread management -->
+                <div class="chat-sidebar">
+                    <h6><i class="fas fa-comments"></i> گفتگوها</h6>
+                    <div class="new-thread-area">
+                        <input type="text" id="newThreadTitle" placeholder="عنوان (اختیاری)" />
+                        <button class="btn-gold" id="createThreadBtn"><i class="fas fa-plus"></i> جدید</button>
+                    </div>
+                    <div class="thread-list" id="threadList">
+                        <div class="empty-state" style="padding:20px 0; font-size:0.82rem;">
+                            <i class="fas fa-spinner fa-spin"></i> در حال بارگذاری...
+                        </div>
+                    </div>
+                </div>
+                <!-- Chat container -->
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div><i class="fas fa-comment text-gold"></i> <span id="chatThreadTitle">گفتگویی انتخاب
+                                نشده</span></div>
+                        <div class="status"><span class="dot offline" id="chatDot"></span><span
+                                id="chatStatusText">قطع</span></div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="system-msg">برای شروع یک گفتگو از نوار کناری انتخاب کنید یا گفتگوی جدید بسازید.
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" placeholder="پیام خود را بنویسید..." disabled />
+                        <button class="btn-gold" id="chatSendBtn" disabled><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // Configure marked for tables and GFM
+            marked.setOptions({
+                gfm: true,
+                tables: true,
+                breaks: false,
+                pedantic: false,
+                sanitize: false,
+                smartLists: true,
+                smartypants: false
+            });
+
+            const BASE_URL = 'http://127.0.0.1:8000';
+            const WS_URL = 'ws://127.0.0.1:8000/chat/ws/chat';
+
+            const ASSETS = {
+                gold: { label: 'طلای جهانی', icon: 'fa-coins' },
+                dxy: { label: 'شاخص دلار', icon: 'fa-dollar-sign' },
+                silver: { label: 'نقره', icon: 'fa-gem' },
+                oil: { label: 'نفت WTI', icon: 'fa-oil-can' },
+                sp500: { label: 'S&P 500', icon: 'fa-chart-bar' },
+            };
+
+            let currentUser = null;
+            let ws = null;
+            let currentThreadId = null;
+            let threadsCache = [];          // { thread_id, title, created_at }
+            const messageBuffer = {};
+            const displayedSelfMessages = new Set();
+            let currentThinkingIndicator = null;  // DOM element for "thinking..."
+
+            const $ = (s) => document.querySelector(s);
+            const $$ = (s) => document.querySelectorAll(s);
+
+            const pages = {
+                dashboard: $('#page-dashboard'),
+                login: $('#page-login'),
+                signup: $('#page-signup'),
+                tickets: $('#page-tickets'),
+                admin: $('#page-admin'),
+                chat: $('#page-chat'),
+            };
+
+            // ====================== TOAST / SPINNER ======================
+            function showToast(message, type = 'info', duration = 4000) {
+                const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+                const el = document.createElement('div');
+                el.className = `toast-custom ${type}`;
+                el.innerHTML = `<span><i class="fas ${icons[type] || icons.info}"></i></span><span>${message}</span><button class="toast-close">&times;</button>`;
+                el.querySelector('.toast-close').addEventListener('click', () => el.remove());
+                $('#toastContainer').prepend(el);
+                setTimeout(() => { if (el.parentNode) el.remove(); }, duration);
+            }
+            function showSpinner(show) { $('#spinnerOverlay').classList.toggle('show', show); }
+
+            // ====================== JWT HELPER ======================
+            function decodeJwt(token) {
+                try {
+                    const payload = token.split('.')[1];
+                    const json = decodeURIComponent(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+                        .split('').map(c => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join(''));
+                    return JSON.parse(json);
+                } catch (_) { return null; }
+            }
+
+            // ====================== NAVIGATION ======================
+            function navigateTo(pageId) {
+                Object.values(pages).forEach(p => p.classList.remove('active'));
+                if (pages[pageId]) pages[pageId].classList.add('active');
+                $$('.nav-link[data-page]').forEach(l => l.classList.toggle('active', l.dataset.page === pageId));
+
+                if (pageId === 'tickets' && currentUser?.role === 'admin') loadTickets();
+                if (pageId === 'dashboard') loadAssets();
+                if (pageId === 'chat' && currentUser) loadThreads();
+            }
+
+            $$('[data-page]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = el.dataset.page;
+                    if ((page === 'tickets' || page === 'admin') && currentUser?.role !== 'admin') {
+                        showToast('این بخش فقط برای ادمین در دسترس است.', 'error');
+                        return;
+                    }
+                    if (page === 'chat' && !currentUser) {
+                        showToast('لطفاً ابتدا وارد شوید.', 'error');
+                        navigateTo('login');
+                        return;
+                    }
+                    if ((page === 'login' || page === 'signup') && currentUser) {
+                        showToast('شما قبلاً وارد شده‌اید.', 'info');
+                        return;
+                    }
+                    navigateTo(page);
+                });
+            });
+
+            // ====================== AUTH UI ======================
+            function updateAuthUI() {
+                const isAdmin = currentUser?.role === 'admin';
+                $$('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
+                if (currentUser) {
+                    $('#authButtons').classList.add('hidden');
+                    $('#userBadge').classList.remove('hidden');
+                    $('#userNameDisplay').textContent = currentUser.username;
+                    $('#userRoleDisplay').textContent = currentUser.role;
+                    $('#userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+                    $('#assetsAuthNotice').classList.add('hidden');
+                } else {
+                    $('#authButtons').classList.remove('hidden');
+                    $('#userBadge').classList.add('hidden');
+                    $('#assetsAuthNotice').classList.remove('hidden');
+                    const active = $('.page.active');
+                    if (active && ['tickets', 'admin', 'chat'].includes(active.id.replace('page-', ''))) {
+                        navigateTo('dashboard');
+                    }
+                }
+            }
+
+            // ====================== API ======================
+            async function apiFetch(endpoint, options = {}) {
+                const url = `${BASE_URL}${endpoint}`;
+                const headers = { 'Accept': 'application/json', ...(options.headers || {}) };
+                const token = localStorage.getItem('token');
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+                if (options.body && !(options.body instanceof FormData) && !options._form) {
+                    headers['Content-Type'] = 'application/json';
+                }
+                const resp = await fetch(url, { ...options, headers });
+                const ct = resp.headers.get('content-type') || '';
+                const data = ct.includes('application/json') ? await resp.json() : await resp.text();
+                if (!resp.ok) {
+                    const msg = typeof data === 'object' && data?.detail ? data.detail : (data || 'خطا در ارتباط با سرور');
+                    throw new Error(typeof msg === 'string' ? msg : JSON.stringify(msg));
+                }
+                return data;
+            }
+
+            // ====================== AUTH HANDLERS ======================
+            $('#loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = $('#loginUsername').value.trim();
+                const password = $('#loginPassword').value.trim();
+                if (!username || !password) { showToast('لطفاً همه فیلدها را پر کنید.', 'error'); return; }
+                showSpinner(true);
+                try {
+                    const params = new URLSearchParams({ username, password });
+                    const data = await apiFetch('/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params, _form: true,
+                    });
+                    localStorage.setItem('token', data.access_token);
+                    const claims = decodeJwt(data.access_token) || {};
+                    currentUser = { username: claims.sub || username, role: claims.role || 'user' };
+                    updateAuthUI();
+                    showToast(`خوش آمدید ${currentUser.username}!`, 'success');
+                    navigateTo('dashboard');
+                    e.target.reset();
+                } catch (err) {
+                    showToast(err.message || 'ورود ناموفق بود.', 'error');
+                } finally { showSpinner(false); }
+            });
+
+            $('#signupForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = $('#signupUsername').value.trim();
+                const password = $('#signupPassword').value.trim();
+                if (!username || !password) { showToast('لطفاً همه فیلدها را پر کنید.', 'error'); return; }
+                showSpinner(true);
+                try {
+                    const user = await apiFetch('/auth/signup', { method: 'POST', body: JSON.stringify({ username, password }) });
+                    showToast(`ثبت‌نام موفق (نقش: ${user.role}). حالا وارد شوید.`, 'success');
+                    e.target.reset();
+                    navigateTo('login');
+                } catch (err) {
+                    showToast(err.message || 'ثبت‌نام ناموفق بود.', 'error');
+                } finally { showSpinner(false); }
+            });
+
+            $('#logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                currentUser = null;
+                disconnectWebSocket();
+                updateAuthUI();
+                showToast('شما خارج شدید.', 'info');
+                navigateTo('dashboard');
+            });
+
+            // ====================== ASSETS ======================
+            async function loadAssets() {
+                const container = $('#assetCards');
+                if (!currentUser) {
+                    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-lock"></i>برای مشاهده وارد شوید.</div>`;
+                    renderTicker([]);
+                    return;
+                }
+                container.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-spinner fa-spin"></i>در حال بارگذاری...</div>`;
+
+                const results = [];
+                for (const [key, meta] of Object.entries(ASSETS)) {
+                    try {
+                        const rows = await apiFetch(`/data/${key}?rows=2`);
+                        let price = null, change = 0, date = null;
+                        if (Array.isArray(rows) && rows.length > 0) {
+                            const latest = rows[rows.length - 1];
+                            const prev = rows.length > 1 ? rows[rows.length - 2] : null;
+                            price = latest.adj_close ?? latest.close;
+                            date = latest.date;
+                            if (prev) {
+                                const prevPrice = prev.adj_close ?? prev.close;
+                                if (typeof price === 'number' && typeof prevPrice === 'number' && prevPrice !== 0) {
+                                    change = ((price - prevPrice) / prevPrice) * 100;
+                                }
+                            }
+                        }
+                        results.push({ key, ...meta, price, change, date, error: null });
+                    } catch (err) {
+                        results.push({ key, ...meta, price: null, change: 0, date: null, error: err.message });
+                    }
+                }
+
+                container.innerHTML = '';
+                results.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'card asset-card';
+                    const changeClass = item.price !== null ? (item.change >= 0 ? 'pos' : 'neg') : '';
+                    const changeText = item.price !== null ? `${item.change >= 0 ? '+' : ''}${item.change.toFixed(2)}%` : '—';
+                    const priceText = item.price !== null ? item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
+                    div.innerHTML = `
+                <div class="asset-label"><i class="fas ${item.icon}"></i> ${item.label}</div>
+                <div class="asset-price">${priceText}</div>
+                <span class="asset-change ${changeClass}">${changeText}</span>
+                ${item.date ? `<div class="asset-date">${item.date}</div>` : ''}
+                ${item.error ? `<div style="color:var(--red);font-size:0.72rem;margin-top:8px;">${item.error}</div>` : ''}
+            `;
+                    container.appendChild(div);
+                });
+
+                renderTicker(results);
+            }
+
+            function renderTicker(results) {
+                const track = $('#tickerTrack');
+                if (!results.length) {
+                    track.innerHTML = `<span class="ticker-item">برای مشاهدهٔ قیمت زنده وارد حساب کاربری شوید</span>`;
+                    return;
+                }
+                const itemsHtml = results.map(r => {
+                    const cls = r.price === null ? '' : (r.change >= 0 ? 'up' : 'down');
+                    const arrow = r.price === null ? '' : (r.change >= 0 ? '▲' : '▼');
+                    const priceTxt = r.price !== null ? r.price.toFixed(2) : 'N/A';
+                    const changeTxt = r.price !== null ? `${arrow} ${Math.abs(r.change).toFixed(2)}%` : '';
+                    return `<span class="ticker-item">${r.label.toUpperCase()} <b>${priceTxt}</b> <span class="${cls}">${changeTxt}</span></span>`;
+                }).join('');
+                track.innerHTML = itemsHtml + itemsHtml;
+            }
+            $('#refreshAssetsBtn').addEventListener('click', loadAssets);
+
+            // ====================== TICKETS ======================
+            async function loadTickets() {
+                const body = $('#ticketsBody');
+                body.innerHTML = `<tr><td colspan="7" class="empty-state"><i class="fas fa-spinner fa-spin"></i>در حال بارگذاری...</td></tr>`;
+                try {
+                    const tickets = await apiFetch('/admin/tickets');
+                    if (!Array.isArray(tickets) || tickets.length === 0) {
+                        body.innerHTML = `<tr><td colspan="7" class="empty-state">هیچ تیکتی وجود ندارد.</td></tr>`;
+                        return;
+                    }
+                    body.innerHTML = '';
+                    tickets.forEach((t, idx) => {
+                        const tr = document.createElement('tr');
+                        const date = t.created_at ? new Date(t.created_at).toLocaleString('fa-IR') : '—';
+                        tr.innerHTML = `
+                    <td>${t.id ?? idx + 1}</td>
+                    <td>${t.topic || '—'}</td>
+                    <td>${t.building_name || '—'}</td>
+                    <td dir="ltr" style="text-align:left;">${t.building_phone || '—'}</td>
+                    <td>${t.user_id || '—'}</td>
+                    <td>${date}</td>
+                    <td><button class="btn-danger-sm" data-id="${t.id}"><i class="fas fa-trash-alt"></i> حذف</button></td>
+                `;
+                        body.appendChild(tr);
+                    });
+                    body.querySelectorAll('.btn-danger-sm').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            if (confirm('این تیکت برای همیشه حذف شود؟')) deleteTicket(btn.dataset.id);
+                        });
+                    });
+                } catch (err) {
+                    body.innerHTML = `<tr><td colspan="7" class="empty-state" style="color:var(--red);">خطا: ${err.message}</td></tr>`;
+                }
+            }
+
+            async function deleteTicket(id) {
+                showSpinner(true);
+                try {
+                    await apiFetch(`/admin/tickets/${id}`, { method: 'GET' });  // matches backend route
+                    showToast('تیکت حذف شد.', 'success');
+                    loadTickets();
+                } catch (err) {
+                    showToast('خطا در حذف تیکت: ' + err.message, 'error');
+                } finally { showSpinner(false); }
+            }
+            $('#refreshTicketsBtn').addEventListener('click', loadTickets);
+
+            // ====================== UPLOAD ======================
+            const uploadArea = $('#uploadArea'), fileInput = $('#fileInput'), selectedFileName = $('#selectedFileName');
+            uploadArea.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', () => {
+                selectedFileName.textContent = fileInput.files.length ? fileInput.files[0].name : 'هیچ فایلی انتخاب نشده (فقط txt/md)';
+            });
+            ['dragover'].forEach(ev => uploadArea.addEventListener(ev, (e) => { e.preventDefault(); uploadArea.classList.add('drag'); }));
+            ['dragleave', 'drop'].forEach(ev => uploadArea.addEventListener(ev, () => uploadArea.classList.remove('drag')));
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    selectedFileName.textContent = fileInput.files[0].name;
+                }
+            });
+
+            $('#uploadForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!fileInput.files.length) { showToast('لطفاً یک فایل انتخاب کنید.', 'error'); return; }
+                const name = fileInput.files[0].name.toLowerCase();
+                if (!name.endsWith('.txt') && !name.endsWith('.md')) {
+                    showToast('فقط فایل‌های .txt و .md پذیرفته می‌شوند.', 'error');
+                    return;
+                }
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                showSpinner(true);
+                try {
+                    const res = await apiFetch('/admin/upload-file', { method: 'POST', body: formData });
+                    showToast(`فایل آپلود شد — ${res.chunks_stored} بخش ذخیره شد.`, 'success');
+                    fileInput.value = '';
+                    selectedFileName.textContent = 'هیچ فایلی انتخاب نشده (فقط txt/md)';
+                } catch (err) {
+                    showToast('آپلود ناموفق بود: ' + err.message, 'error');
+                } finally { showSpinner(false); }
+            });
+
+            // ====================== CHAT - THREAD MANAGEMENT ======================
+            async function loadThreads() {
+                const listEl = $('#threadList');
+                listEl.innerHTML = `<div class="empty-state" style="padding:20px 0;"><i class="fas fa-spinner fa-spin"></i> در حال بارگذاری...</div>`;
+                try {
+                    const threads = await apiFetch('/chat/threads');
+                    threadsCache = Array.isArray(threads) ? threads : [];
+                    renderThreadList();
+                } catch (err) {
+                    listEl.innerHTML = `<div class="empty-state" style="padding:20px 0; color:var(--red);">خطا: ${err.message}</div>`;
+                }
+            }
+
+            function renderThreadList() {
+                const listEl = $('#threadList');
+                if (!threadsCache.length) {
+                    listEl.innerHTML = `<div class="empty-state" style="padding:20px 0;">هیچ گفتگویی وجود ندارد.</div>`;
+                    return;
+                }
+                listEl.innerHTML = '';
+                threadsCache.forEach(thread => {
+                    const item = document.createElement('div');
+                    item.className = `thread-item${thread.thread_id === currentThreadId ? ' active' : ''}`;
+                    const dateStr = thread.created_at ? new Date(thread.created_at).toLocaleDateString('fa-IR', { month: 'short', day: 'numeric' }) : '';
+                    item.innerHTML = `
+                <span class="thread-title" title="${thread.title || thread.thread_id}">${thread.title || 'بدون عنوان'}</span>
+                ${dateStr ? `<span class="thread-date">${dateStr}</span>` : ''}
+                <button class="delete-thread-btn" data-thread-id="${thread.thread_id}" title="حذف"><i class="fas fa-trash-alt"></i></button>
+            `;
+                    // Select thread on click (but not on delete button)
+                    item.addEventListener('click', (e) => {
+                        if (e.target.closest('.delete-thread-btn')) return;
+                        selectThread(thread.thread_id);
+                    });
+                    // Delete button
+                    item.querySelector('.delete-thread-btn').addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        if (confirm(`گفتگو "${thread.title || thread.thread_id}" حذف شود؟`)) {
+                            await deleteThread(thread.thread_id);
+                        }
+                    });
+                    listEl.appendChild(item);
+                });
+            }
+
+            async function selectThread(threadId) {
+                if (currentThreadId === threadId) return;
+                // Disconnect current WS and clear messages
+                disconnectWebSocket();
+                removeThinkingIndicator();  // clean up any existing thinking message
+                $('#chatMessages').innerHTML = `<div class="system-msg">در حال بارگذاری تاریخچه...</div>`;
+                currentThreadId = threadId;
+                // Update active state in sidebar
+                document.querySelectorAll('.thread-item').forEach(el => el.classList.remove('active'));
+                const activeItem = document.querySelector(`.delete-thread-btn[data-thread-id="${threadId}"]`)?.closest('.thread-item');
+                if (activeItem) activeItem.classList.add('active');
+                // Update header
+                const thread = threadsCache.find(t => t.thread_id === threadId);
+                $('#chatThreadTitle').textContent = thread?.title || threadId;
+                setChatStatus(false, 'در حال بارگذاری...');
+
+                // Load history messages
+                try {
+                    const messages = await apiFetch(`/chat/threads/${threadId}/messages`);
+                    $('#chatMessages').innerHTML = '';
+                    if (messages.length === 0) {
+                        $('#chatMessages').innerHTML = `<div class="system-msg">تاریخچه خالی است — پیام جدید بفرستید.</div>`;
+                    } else {
+                        messages.forEach(msg => addHistoryMessage(msg));
+                    }
+                } catch (err) {
+                    $('#chatMessages').innerHTML = `<div class="system-msg" style="color:var(--red);">خطا در بارگذاری پیام‌ها: ${err.message}</div>`;
+                }
+
+                // Connect websocket for live messaging
+                connectWebSocket(threadId);
+            }
+
+            function addHistoryMessage(msg) {
+                // msg: { id, type, content }
+                const container = document.createElement('div');
+                if (msg.type === 'human') {
+                    container.className = 'msg self';
+                    container.innerHTML = `<div>${escapeHtml(msg.content)}</div>`;
+                } else if (msg.type === 'ai') {
+                    container.className = 'msg other';
+                    container.innerHTML = `<div class="markdown-body">${renderMarkdown(msg.content)}</div>`;
+                    if (msg.id) addFeedbackButtons(container, msg.id);
+                } else if (msg.type === 'tool') {
+                    container.className = 'tool-call-msg';
+                    container.innerHTML = `<i class="fas fa-cogs"></i> نتیجه ابزار <span class="tool-detail">${escapeHtml(msg.content)}</span>`;
+                } else {
+                    container.className = 'system-msg';
+                    container.textContent = msg.content;
+                }
+                if (msg.id) container.dataset.msgId = msg.id;
+                $('#chatMessages').appendChild(container);
+                $('#chatMessages').scrollTop = $('#chatMessages').scrollHeight;
+            }
+
+            async function createNewThread() {
+                const titleInput = $('#newThreadTitle');
+                const title = titleInput.value.trim() || undefined;
+                showSpinner(true);
+                try {
+                    const newThread = await apiFetch('/chat/threads', {
+                        method: 'POST',
+                        body: JSON.stringify({ title }),
+                    });
+                    showToast('گفتگوی جدید ساخته شد.', 'success');
+                    titleInput.value = '';
+                    await loadThreads();
+                    // auto select the new thread
+                    selectThread(newThread.thread_id);
+                } catch (err) {
+                    showToast('ساخت گفتگو ناموفق: ' + err.message, 'error');
+                } finally { showSpinner(false); }
+            }
+
+            async function deleteThread(threadId) {
+                showSpinner(true);
+                try {
+                    await apiFetch(`/chat/threads/${threadId}`, { method: 'DELETE' });
+                    showToast('گفتگو حذف شد.', 'success');
+                    // if deleted thread was active, disconnect and clear
+                    if (currentThreadId === threadId) {
+                        disconnectWebSocket();
+                        currentThreadId = null;
+                        removeThinkingIndicator();
+                        $('#chatMessages').innerHTML = `<div class="system-msg">گفتگویی انتخاب نشده.</div>`;
+                        $('#chatThreadTitle').textContent = 'گفتگویی انتخاب نشده';
+                        $('#chatInput').disabled = true;
+                        $('#chatSendBtn').disabled = true;
+                        setChatStatus(false);
+                    }
+                    await loadThreads();
+                } catch (err) {
+                    showToast('حذف گفتگو ناموفق: ' + err.message, 'error');
+                } finally { showSpinner(false); }
+            }
+
+            $('#createThreadBtn').addEventListener('click', createNewThread);
+            $('#newThreadTitle').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') createNewThread();
+            });
+
+            // ====================== WEBSOCKET CHAT ======================
+            function setChatStatus(connected, text) {
+                $('#chatDot').className = `dot ${connected ? 'online' : 'offline'}`;
+                $('#chatStatusText').textContent = text || (connected ? 'آنلاین' : 'قطع');
+            }
+
+            function renderMarkdown(text) {
+                try { return marked.parse(text); } catch (_) { return text; }
+            }
+            function escapeHtml(text) {
+                return String(text).replace(/[&<>"']/g, function (m) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+                });
+            }
+
+            function addChatMessage(text, sender, isSelf, msgId = null) {
+                const div = document.createElement('div');
+                div.className = `msg ${isSelf ? 'self' : 'other'}`;
+                if (msgId) div.dataset.msgId = msgId;
+                const time = new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+                const contentDiv = document.createElement('div');
+                if (sender === 'assistant' && !isSelf) {
+                    contentDiv.className = 'markdown-body';
+                    contentDiv.innerHTML = renderMarkdown(text);
+                } else {
+                    contentDiv.textContent = text;
+                }
+                const meta = document.createElement('span');
+                meta.className = 'msg-meta';
+                meta.textContent = `${sender} • ${time}`;
+                div.appendChild(contentDiv);
+                div.appendChild(meta);
+                $('#chatMessages').appendChild(div);
+                $('#chatMessages').scrollTop = $('#chatMessages').scrollHeight;
+                return div;
+            }
+
+            function addSystemMessage(text) {
+                const div = document.createElement('div');
+                div.className = 'system-msg';
+                div.textContent = text;
+                $('#chatMessages').appendChild(div);
+                $('#chatMessages').scrollTop = $('#chatMessages').scrollHeight;
+            }
+
+            function addToolCallMessage(name, args) {
+                const div = document.createElement('div');
+                div.className = 'tool-call-msg';
+                div.innerHTML = `<i class="fas fa-cogs"></i> فراخوانی ابزار: <strong>${name}</strong><span class="tool-detail">${JSON.stringify(args, null, 2)}</span>`;
+                $('#chatMessages').appendChild(div);
+                $('#chatMessages').scrollTop = $('#chatMessages').scrollHeight;
+            }
+
+            function flushBuffer(key) {
+                const entry = messageBuffer[key];
+                if (!entry) return;
+                delete messageBuffer[key];
+                const finalText = entry.text.trim();
+                if (!finalText || !entry.container) return;
+                const contentDiv = entry.container.querySelector('div');
+                if (contentDiv) {
+                    if (entry.sender === 'assistant' && !entry.isSelf) {
+                        contentDiv.className = 'markdown-body';
+                        contentDiv.innerHTML = renderMarkdown(finalText);
+                    } else {
+                        contentDiv.textContent = finalText;
+                    }
+                }
+                if (!entry.isSelf && entry.sender === 'assistant' && entry.msgId) {
+                    addFeedbackButtons(entry.container, entry.msgId);
+                }
+            }
+
+            function bufferMessage(sender, text, isSelf, msgId) {
+                const key = msgId || sender;
+                if (messageBuffer[key]) {
+                    const entry = messageBuffer[key];
+                    entry.text += text;
+                    clearTimeout(entry.timer);
+                    const contentDiv = entry.container?.querySelector('div');
+                    if (contentDiv) {
+                        if (sender === 'assistant' && !isSelf) {
+                            contentDiv.className = 'markdown-body';
+                            contentDiv.innerHTML = renderMarkdown(entry.text);
+                        } else {
+                            contentDiv.textContent = entry.text;
+                        }
+                    }
+                    entry.timer = setTimeout(() => flushBuffer(key), 500);
+                    return;
+                }
+                const container = addChatMessage(text, sender, isSelf, msgId);
+                messageBuffer[key] = { text, timer: setTimeout(() => flushBuffer(key), 500), container, isSelf, sender, msgId };
+            }
+
+            async function sendFeedback(messageId, rating) {
+                if (!currentThreadId) throw new Error('گفتگویی متصل نیست.');
+                await apiFetch('/chat/feedback', {
+                    method: 'POST',
+                    body: JSON.stringify({ thread_id: currentThreadId, message_id: messageId, rating, comment: null }),
+                });
+            }
+
+            function addFeedbackButtons(container, msgId) {
+                if (container.querySelector('.feedback-buttons')) return;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'feedback-buttons';
+                const likeBtn = document.createElement('button');
+                likeBtn.className = 'fb-btn like'; likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i>';
+                const dislikeBtn = document.createElement('button');
+                dislikeBtn.className = 'fb-btn dislike'; dislikeBtn.innerHTML = '<i class="fas fa-thumbs-down"></i>';
+                wrapper.append(likeBtn, dislikeBtn);
+                container.appendChild(wrapper);
+                let rated = false;
+                const rate = async (rating) => {
+                    if (rated) return;
+                    rated = true; likeBtn.disabled = true; dislikeBtn.disabled = true;
+                    try {
+                        await sendFeedback(msgId, rating);
+                        (rating === 1 ? likeBtn : dislikeBtn).classList.add('active');
+                        showToast('نظر شما ثبت شد!', 'success');
+                    } catch (err) {
+                        rated = false; likeBtn.disabled = false; dislikeBtn.disabled = false;
+                        showToast('خطا در ثبت نظر: ' + err.message, 'error');
+                    }
+                };
+                likeBtn.addEventListener('click', () => rate(1));
+                dislikeBtn.addEventListener('click', () => rate(-1));
+            }
+
+            // Thinking indicator management
+            function removeThinkingIndicator() {
+                if (currentThinkingIndicator && currentThinkingIndicator.parentNode) {
+                    currentThinkingIndicator.remove();
+                    currentThinkingIndicator = null;
+                }
+            }
+
+            function showThinkingIndicator() {
+                removeThinkingIndicator();  // ensure only one
+                const div = document.createElement('div');
+                div.className = 'thinking-indicator';
+                div.innerHTML = `
+                    <span>دستیار در حال فکر کردن</span>
+                    <div class="thinking-dots">
+                        <span></span><span></span><span></span>
+                    </div>`;
+                $('#chatMessages').appendChild(div);
+                $('#chatMessages').scrollTop = $('#chatMessages').scrollHeight;
+                currentThinkingIndicator = div;
+            }
+
+            function disconnectWebSocket() {
+                if (ws) { try { ws.close(); } catch (_) { } ws = null; }
+                setChatStatus(false);
+                $('#chatInput').disabled = true;
+                $('#chatSendBtn').disabled = true;
+                // Clear all buffers
+                Object.keys(messageBuffer).forEach(k => { clearTimeout(messageBuffer[k].timer); delete messageBuffer[k]; });
+                removeThinkingIndicator();
+            }
+
+            function connectWebSocket(threadId) {
+                if (!currentUser) { showToast('لطفاً ابتدا وارد شوید.', 'error'); return; }
+                const token = localStorage.getItem('token');
+                disconnectWebSocket();  // ensure old connection is closed
+                currentThreadId = threadId;
+
+                const wsUrl = `${WS_URL}?token=${encodeURIComponent(token)}&thread_id=${encodeURIComponent(threadId)}`;
+                ws = new WebSocket(wsUrl);
+
+                ws.onopen = () => {
+                    setChatStatus(true);
+                    $('#chatInput').disabled = false;
+                    $('#chatSendBtn').disabled = false;
+                };
+
+                ws.onmessage = (event) => {
+                    let data;
+                    try { data = JSON.parse(event.data); } catch (_) { data = { message: event.data }; }
+                    // Remove thinking indicator on any agent activity
+                    removeThinkingIndicator();
+
+                    switch (data.type) {
+                        case 'tool_call':
+                            addToolCallMessage(data.name || 'unknown', data.args || {});
+                            break;
+                        case 'token':
+                            bufferMessage('assistant', data.content || '', false, data.message_id || null);
+                            break;
+                        case 'done':
+                            Object.keys(messageBuffer).forEach(key => flushBuffer(key));
+                            break;
+                        default:
+                            break;
+                    }
+                };
+
+                ws.onclose = () => {
+                    setChatStatus(false);
+                    $('#chatInput').disabled = true;
+                    $('#chatSendBtn').disabled = true;
+                    removeThinkingIndicator();
+                    addSystemMessage('اتصال قطع شد.');
+                };
+
+                ws.onerror = () => { };
+            }
+
+            function sendChatMessage() {
+                const text = $('#chatInput').value.trim();
+                if (!text || !ws || ws.readyState !== WebSocket.OPEN) {
+                    showToast('اتصال به گفتگو برقرار نیست.', 'error');
+                    return;
+                }
+                const msgId = `local-${Date.now()}`;
+                addChatMessage(text, currentUser.username, true, msgId);
+                ws.send(text);
+                $('#chatInput').value = '';
+                $('#chatInput').focus();
+                // Show thinking indicator after sending message
+                showThinkingIndicator();
+            }
+
+            $('#chatSendBtn').addEventListener('click', sendChatMessage);
+            $('#chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
+
+            // ====================== INIT ======================
+            function init() {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    const claims = decodeJwt(token);
+                    if (claims?.sub) {
+                        currentUser = { username: claims.sub, role: claims.role || 'user' };
+                    } else {
+                        localStorage.removeItem('token');
+                    }
+                }
+                updateAuthUI();
+                navigateTo('dashboard');
+                loadAssets();
+                setInterval(loadAssets, 60000);
+            }
+
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+    </script>
+</body>
+
+</html>
