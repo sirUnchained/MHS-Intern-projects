@@ -38,7 +38,7 @@ Mana.tickets = {
     delete: async function (id) {
         Mana.showSpinner(true);
         try {
-            await Mana.apiFetch(`/admin/tickets/${id}`, { method: 'GET' });
+            await Mana.apiFetch(`/admin/tickets/${id}`, { method: 'DELETE' });
             Mana.showToast('تیکت حذف شد.', 'success');
             Mana.tickets.load();
         } catch (err) {
