@@ -19,17 +19,6 @@ services:
       timeout: 5s
       retries: 10
 
-  ollama:
-    image: ollama/ollama:latest
-    restart: unless-stopped
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-      # After first `docker compose up`, pull whatever models you reference in .env, e.g.:
-      #   docker compose exec ollama ollama pull qwen2.5-1.5b-instruct
-      # docker compose exec ollama ollama pull qllama/bge-small-en-v1.5
-
   backend:
     build:
       context: .

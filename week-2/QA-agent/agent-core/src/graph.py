@@ -1,12 +1,12 @@
 from langchain_groq import ChatGroq
 from langchain_ollama.embeddings import OllamaEmbeddings
+from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 import psycopg
 from psycopg.rows import dict_row
 from langgraph.store.postgres import PostgresStore
 from langgraph.checkpoint.postgres import PostgresSaver
-from langchain_ollama.embeddings import OllamaEmbeddings
 from psycopg_pool import ConnectionPool
 
 from config import get_settings
@@ -43,7 +43,9 @@ def build_graph():
         api_key=settings.GROQ_API_KEY,
         temperature=0.5,
     )
-    embedding_model = OllamaEmbeddings(model=settings.OLLAMA_EMBEDDING_MODEL_NAME)
+    embedding_model = GoogleGenerativeAIEmbeddings(
+        model=settings.GOOGLE_EMBEDDING_MODEL_NAME, api_key=settings.GOOGLE_API_KEY
+    )
 
     graph_builder = StateGraph(SupportState)
 

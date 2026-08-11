@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
-from langchain_ollama.embeddings import OllamaEmbeddings
+from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
 
 from app.deps import require_admin
 from app.features.auth.models import User
@@ -37,7 +37,9 @@ async def upload_file(
         raise HTTPException(status_code=400, detail="File must be UTF-8 text")
 
     settings = get_settings()
-    embedding_model = OllamaEmbeddings(model=settings.OLLAMA_EMBEDDING_MODEL_NAME)
+    embedding_model = GoogleGenerativeAIEmbeddings(
+        model=settings.GOOGLE_EMBEDDING_MODEL_NAME, api_key=settings.GOOGLE_API_KEY
+    )
 
     chunks_stored = ingest_text(
         text=text, source_name=file.filename, embedding_model=embedding_model

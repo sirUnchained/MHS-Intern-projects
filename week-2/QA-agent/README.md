@@ -1,260 +1,220 @@
-# QA-agent — Gold Market Support Agent
+# Mana (مانا) — QA Support & Market Analysis Agent
 
-A LangGraph-powered support assistant that answers gold/macro market
-questions using live financial data and web search, falls back to a
-RAG knowledge base and human-support ticketing for anything outside its
-domain, and remembers relevant facts about each user across sessions.
-
-Backend is FastAPI + Postgres (with `pgvector`), the agent graph is built
-with LangGraph, and LLM calls go through Groq.
-
-**NOTE**: There are 2 versions:
-1. **The agent core**: which is just langgraph flow.
-2. **The full agent**: which is the langgraph flow + backend & client; This `README.md` is for the **full agent**.
+A FastAPI backend built around a [LangGraph](https://github.com/langchain-ai/langgraph) agent that
+handles Phase‑1 customer support, retrieves answers from an ingested knowledge base (RAG), pulls
+financial market data (gold, silver, oil, DXY, S&P 500), and escalates anything out of scope to a
+human-support ticket queue. Ships with a small vanilla JS/HTML frontend (Persian, RTL) for chat,
+an admin knowledge-base uploader, and a ticket dashboard.
 
 ## Client
 
-<!-- Add your client screenshot below -->
-
-![Client screenshot](./Screenshot.png)
+![Client screenshot](./screenshot.png)
 
 ---
 
-## How it works
-
-Every user message goes through a graph of nodes (see `src/graph.py`):
-
-```mermaid
-flowchart RL
-    USER_INPUT(User Input) --> QUESTION_CLASSIFIER{"Can the main agent answer?"}
-
-    QUESTION_CLASSIFIER -->|No| DEPARTMENT_CLASSIFIER_AND_TICKET_DATA_EXTRACTOR[Department Classifier and etract data for ticket]
-    DEPARTMENT_CLASSIFIER_AND_TICKET_DATA_EXTRACTOR --> CLASSIFIED_DEPARTMENT(Create Ticket for department)
-    QUESTION_CLASSIFIER -->|Yes| AGENT["Agent"]
-
-    subgraph Agent_pipeline [Agent pipeline]
-        AGENT --> TOOLS["Other tools"]
-        TOOLS --> |if tool limit is not reached| AGENT
-        AGENT --> |if tool limit is reached| TOOLS_LIMIT
-        TOOLS_LIMIT["no more tool use"] --> AGENT
-    end
-
-    AGENT --> VALIDATE_AGENT_RESPONSE{Is Agent Response Ok?}
-
-    
-    VALIDATE_AGENT_RESPONSE -->|No| DEPARTMENT_CLASSIFIER_AND_TICKET_DATA_EXTRACTOR
-    VALIDATE_AGENT_RESPONSE -->|Yes| IS_DATA_WORTH_TO_SAVE 
-
-    subgraph DATABASE_PIPELINE [database pipeline]
-        IS_DATA_WORTH_TO_SAVE{"Extracting chat and check if it is worth to save?"} --> |Yes| SAVE_TO_DATABASE["Save data to database"]
-    end
-
-    SAVE_TO_DATABASE --> DONE_FROM_AGENT("done from agent")
-    IS_DATA_WORTH_TO_SAVE --> |no| DONE_FROM_AGENT("done from agent")
-```
-
-1. **`question_classifier_node`** — a small LLM decides whether the request
-   is in-domain (gold prices, currencies, macro events → `"rag"`) or should
-   be **escalated** to human support (`"escalate"`).
-2. **`main_agent_node`** — the main LLM, bound to three tools:
-   - `financial_data_tool` — reads OHLCV price history from Postgres
-   - `retriever_tool` — semantic search over a `pgvector` knowledge base
-   - `search_tool` (Tavily) — finance-scoped web search
-   A `tool_calls_count` cap (`MAX_TOOL_CALLS`) prevents infinite tool loops;
-   once hit, `tool_limit_reached_node` forces the agent to answer with what
-   it already has.
-3. **`main_agent_response_validator_node`** — regex-checks the agent's
-   answer for PII (SSN, credit card, email, phone, URLs) before it's
-   allowed to reach the user. A "bad" response is redirected into the
-   escalation/ticket flow instead of being shown as-is.
-4. **`building_classifier_and_ticket_node`** — for escalated requests, an
-   LLM extracts topic/budget/job/goals and picks which support "building"
-   (department) should receive it, then **`insert_ticket_node`** writes a
-   `Ticket` row.
-5. **`extract_data_after_agent_node`** — after a successful (non-escalated)
-   exchange, an LLM decides whether anything is worth remembering long-term
-   (preferences, budget, goals, etc.) and stores it in the `AsyncPostgresStore`,
-   keyed per user. `main_agent_node` semantically searches this store on
-   every turn and injects relevant memories into the system prompt.
-
-State shared between nodes is defined in `src/state.py` (`SupportState`).
-
----
-
-## Features
-
-- **JWT auth** — signup/login, first registered user becomes admin
-- **Streaming chat over WebSocket** — token-by-token agent responses
-- **Tool-using agent** — financial data, RAG retrieval, web search
-- **PII/hallucination guard** on every agent response before it reaches the user
-- **Automatic support ticketing** for out-of-domain requests
-- **Long-term per-user memory** via semantic search over past conversations
-- **RAG ingestion pipeline** — admin file upload → chunk → embed → `pgvector`
-- **ETL pipeline** — pulls OHLCV data from Yahoo Finance into Postgres for the financial data tool
-- **Message feedback (👍/👎)** — like/dislike any assistant message (see below)
-
----
-
-## Project structure
+## Architecture
 
 ```
-agent_full/
-├── config.py                    # env-based Settings + SUPPORT_BUILDINGS config
-├── src/
-│   ├── state.py                 # SupportState / TypedDicts shared across graph nodes
-│   ├── graph.py                 # builds and compiles the LangGraph agent
-│   ├── chat.py                  # chat_stream(): drives the graph, yields ws chunks
-│   ├── helpers.py                # safe_structured_invoke() retry wrapper
-│   ├── prompts.py                # all system prompts
-│   ├── auth/                    # signup/login, JWT, password hashing, deps
-│   ├── database/                # SQLAlchemy models/schemas + engine (tickets, feedback)
-│   ├── nodes/                   # one file per graph node
-│   ├── tools/                   # financial_data_tool, retriever_tool, search_tool
-│   ├── rag/                     # vector_store.py (retriever), ingest.py (chunk+embed)
-│   ├── etl/                     # extract (yfinance) → transform → load (Postgres)
-│   └── api/                     # FastAPI routers: auth, chat (ws), upload, tickets, data, feedback
+agent-full/
+├── agent/                  LangGraph agent: nodes, tools, prompts, graph wiring
+│   ├── graph.py             Builds the StateGraph, wires nodes/edges, sets up Postgres store+checkpointer
+│   ├── chat.py               Async entrypoint used by the WebSocket route (agent/chat.py -> chat_stream)
+│   ├── state.py               Shared graph state (SupportState, TypedDicts)
+│   ├── nodes/                 question_classifier, building_classifier, main_agent, validator,
+│   │                           memory (long-term fact extraction), ticket, tool_limit
+│   ├── tools/                  retriever_tool (RAG), financial_data_tool, search_tool (Tavily)
+│   └── rag/                    vector_store.py / ingest.py — pgvector-backed retriever + ingestion
+│
+├── app/                     FastAPI app
+│   ├── main.py                App factory, router registration, table migrations on startup
+│   ├── core/                   config.py (env settings), engine.py (SQLAlchemy engine + pgvector
+│   │                            extension bootstrap), security.py (JWT + bcrypt)
+│   ├── deps.py                 get_db / get_current_user / require_admin dependencies
+│   └── features/
+│       ├── auth/                 signup/login, first user becomes admin automatically
+│       ├── chat_threads/         thread CRUD + /chat/ws/chat WebSocket streaming endpoint
+│       ├── feedback/              like/dislike on assistant messages
+│       ├── tickets/               admin-only view/delete of escalated support tickets
+│       ├── uploads/               admin-only .txt/.md upload -> chunk -> embed -> pgvector
+│       └── market_data/          authenticated read of OHLCV data (/data/{asset})
+│
+├── etl/                      extract (yfinance) -> transform -> load (Postgres) pipeline for
+│                              market data; also `read.py` used by the financial_data_tool
+├── db/base.py                 SQLAlchemy declarative Base
+└── frontend/                  Static HTML/CSS/JS client (Persian, RTL)
+```
+
+**Flow of a chat message:** the graph classifies the question as `rag` (answerable by the Main
+Agent's general knowledge/tools) or `escalate` (routed to a building/department and turned into a
+support ticket). The Main Agent has three tools available — RAG retriever, financial data lookup,
+and finance-scoped web search — and is capped at `MAX_TOOL_CALLS`. Every agent response is scanned
+for PII (SSN, card numbers, emails, phone numbers, URLs) before being shown to the user; if it
+matches, the conversation is routed to escalation instead. After a substantive exchange, a
+lightweight extraction step decides whether anything is worth saving to long-term memory
+(LangGraph's Postgres-backed store), which is later retrieved and injected into future turns.
+
+---
+
+## Requirements
+
+- Docker + Docker Compose (recommended), **or** Python 3.11 and a local Postgres 16 with the
+  `pgvector` extension available, plus a local Ollama install.
+- API keys: [Groq](https://console.groq.com/) and/or [Google AI Studio](https://aistudio.google.com/)
+  for the LLMs, and [Tavily](https://tavily.com/) for the finance web-search tool.
+- An [Ollama](https://ollama.com/) model pulled locally for embeddings (RAG + long-term memory both
+  require an embedding model — this project is not optional even if you're using Groq/Google for
+  the chat LLMs).
+
+---
+
+## Quick start (Docker)
+
+1. Copy `.env.example` to `.env` in `agent-full/` and fill in the values (see [Environment
+   variables](#environment-variables) below).
+2. From `agent-full/`:
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. Pull the embedding model into the running Ollama container (only needs to be done once — it's
+   *not* included in the image):
+
+   ```bash
+   docker compose exec ollama ollama pull qllama/bge-small-en-v1.5
+   ```
+
+4. Seed market data so `/data/{asset}` and the financial data tool have something to return (see
+   [Seeding market data](#seeding-market-data)).
+5. Open the frontend at `http://localhost:8080` and the API docs at `http://localhost:8000/docs`.
+6. Sign up — **the first account created becomes admin automatically**; there's no promote-to-admin
+   endpoint, so make your first signup count.
+
+## Quick start (local, no Docker)
+
+1. `python -m venv .venv && source .venv/bin/activate`
+2. `pip install -r requirements.txt`
+3. Have Postgres 16+ running locally with `CREATE EXTENSION vector;` permitted (the app runs this
+   automatically on startup via `app/core/engine.py`, but the extension package itself must be
+   installed on the Postgres server).
+4. Have Ollama running locally (`ollama serve`) with your embedding model pulled.
+5. Copy `.env.example` to `.env`, fill in values, keep `POSTGRESQL_DATABASE_LINK` pointed at
+   `127.0.0.1`.
+6. `uvicorn app.main:app --reload`
+7. Serve `frontend/` with any static file server (or open `frontend/index.html` directly — it talks
+   to the backend over the absolute URLs in `frontend/js/config.js`).
+
+---
+
+## Environment variables
+
+Set these in `agent-full/.env`. Example values below are what this project has been run with; blank
+means you must supply your own.
+
+| Variable | Example | Notes |
+| --- | --- | --- |
+| `GROQ_API_KEY` | *(blank — required)* | Needed if using Groq for chat/classification. |
+| `GROQ_MODEL_NAME` | `openai/gpt-oss-20b` | Main agent LLM when using Groq. |
+| `GROQ_CLASSIFY_MODEL_NAME` | `llama-3.1-8b-instant` | Used for the question classifier and building/ticket classifier nodes — this is the **only** classify-model variable actually read by `app/core/config.py`. |
+| `GOOGLE_API_KEY` | *(blank)* | Only relevant if you wire Google in as a model provider — `graph.py` currently builds its LLMs from Groq, not Google, so this is unused unless you extend `agent/graph.py`. |
+| `GOOGLE_MODEL_NAME` | `gemini-3.6-flash` | Same caveat as above. |
+| `GOOGLE_CLASSIFY_MODEL_NAME` | `gemini-3.6-flash` | **Not read by the current codebase** — `config.py` has no such setting. Safe to leave, but it does nothing today. |
+| `OLLAMA_MODEL_NAME` | `qwen2.5-1.5b-instruct` | Declared in config but not currently wired into `graph.py`'s LLM construction — kept for local/offline chat model use if you extend the graph. |
+| `OLLAMA_EMBEDDING_MODEL_NAME` | `qllama/bge-small-en-v1.5` | **Required.** Used for every embedding call (RAG ingestion/retrieval, long-term memory store, admin uploads). Must be pulled into the Ollama instance the app can reach. |
+| `OLLAMA_CLASSIFY_MODEL_NAME` | `openai/gpt-oss-20b` | **Not read by the current codebase.** |
+| `TAVILY_API_KEY` | *(blank — required)* | Powers `agent/tools/search_tool.py` (finance-scoped web search). |
+| `POSTGRESQL_DATABASE_LINK` | `postgresql+psycopg://postgres:11111111@127.0.0.1:5432/support_agent_postgres` | Must use the `postgresql+psycopg://` prefix (psycopg v3), not `postgresql://`. Change the host to `postgres` when running via `docker compose` instead of `127.0.0.1`. |
+| `IS_DEVELOPMENT` | `false` | Currently declared but not branched on anywhere in the code shown — reserved for future use. |
+| `USE_PROXY` | `false` | If `true`, `app/main.py` sets `http_proxy`/`https_proxy` env vars for outbound requests (e.g. Tavily, yfinance). |
+| `PROXY_LINK` | `http://127.0.0.1:8889/` | ⚠️ If you run the backend in Docker, `127.0.0.1` resolves to *the container*, not your host — a host-machine proxy at this address will be unreachable. Either run the proxy inside the same Docker network and point this at that service's name, or use `host.docker.internal` instead of `127.0.0.1` (Docker Desktop) / your host's Docker-bridge IP (Linux). |
+| `MAX_TOOL_CALLS` | `5` | Hard cap on tool calls per turn before the agent is forced to answer with what it already has. |
+| `JWT_SECRET` | *(pick something long and random)* | Used to sign auth tokens — treat as a real secret, don't ship the placeholder value in the example above. Generate one with `openssl rand -hex 32`. |
+
+---
+
+## Seeding market data
+
+`/data/{asset}` and the agent's `financial_data_tool` both read from Postgres tables named
+`ohlcv_gold`, `ohlcv_dxy`, `ohlcv_silver`, `ohlcv_oil`, `ohlcv_sp500` — nothing populates these
+automatically. Run the ETL pipeline manually (or on a schedule) to fetch data from Yahoo Finance and
+load it in, e.g. from a Python shell inside the backend container:
+
+```python
+from app.core.engine import get_engine
+from etl.pipeline import run_pipeline
+
+engine = get_engine()
+run_pipeline("GC=F", engine, "ohlcv_gold", start_date="2023-01-01", if_exists="replace")
+run_pipeline("DX-Y.NYB", engine, "ohlcv_dxy", start_date="2023-01-01", if_exists="replace")
+run_pipeline("SI=F", engine, "ohlcv_silver", start_date="2023-01-01", if_exists="replace")
+run_pipeline("CL=F", engine, "ohlcv_oil", start_date="2023-01-01", if_exists="replace")
+run_pipeline("^GSPC", engine, "ohlcv_sp500", start_date="2023-01-01", if_exists="replace")
+```
+
+Adjust tickers/date ranges as needed; `run_pipeline` also adds an `embedding vector(1536)` column to
+each table by default (`add_vector_column=True`), left unused by the current tools but available if
+you later want to embed price rows.
+
+---
+
+## Admin: uploading knowledge-base documents
+
+Log in as the admin account (the first signup), then use the **Admin** page in the frontend, or call
+the endpoint directly:
+
+```bash
+curl -X POST http://localhost:8000/admin/upload-file \
+  -H "Authorization: Bearer <admin JWT>" \
+  -F "file=@docs/faq.md"
+```
+
+Only `.txt` and `.md` files are accepted. Content is chunked, embedded via
+`OLLAMA_EMBEDDING_MODEL_NAME`, and stored in the `RAG_documents_vectores` pgvector collection, which
+`retriever_tool` searches against.
+
+---
+
+## Key API routes
+
+| Route | Auth | Purpose |
+| --- | --- | --- |
+| `POST /auth/signup` | none | Register; first account becomes admin. |
+| `POST /auth/login` | none | Returns a bearer JWT. |
+| `POST /chat/threads` / `GET /chat/threads` | user | Create / list chat threads. |
+| `GET /chat/threads/{id}/messages` | user (owner) | Full message history for a thread. |
+| `WS /chat/ws/chat?token=&thread_id=` | user (owner) | Live streaming chat over the LangGraph agent. |
+| `POST /chat/feedback` | user | Like/dislike a specific assistant message. |
+| `GET /data/{asset}` | user | Recent OHLCV rows for `gold | dxy | silver | oil | sp500`. |
+| `GET /admin/tickets` | admin | List escalated support tickets. |
+| `GET /admin/tickets/{id}` | admin | Delete a ticket (yes, `GET` — see note below). |
+| `POST /admin/upload-file` | admin | Ingest a `.txt`/`.md` file into the RAG store. |
+| `GET /health` | none | Liveness check, also used by the Docker healthcheck. |
+
+> **Note:** `GET /admin/tickets/{id}` currently performs a delete despite being a `GET` route — this
+> is a known quirk in `app/features/tickets/router.py`, not a documentation error. Worth fixing to a
+> `DELETE` verb if you're extending this API.
+
+---
+
+## Docker
+
+See `docker-compose.yml` in this directory. It runs four services:
+
+- **postgres** — `pgvector/pgvector:pg16` (a plain `postgres` image won't have the `vector`
+  extension available, and startup will fail on `CREATE EXTENSION vector`).
+- **ollama** — embedding model host; pull your model into it after first boot (see Quick Start).
+- **backend** — this FastAPI app, built from the `Dockerfile` in this directory.
+- **frontend** — static frontend served via nginx, built from `frontend/Dockerfile`.
+
+```bash
+docker compose up -d --build
+docker compose logs -f backend
+docker compose down            # add -v to also drop the postgres/ollama volumes
 ```
 
 ---
 
 ## Tech stack
 
-| Layer | Tech |
-|---|---|
-| API | FastAPI, WebSockets |
-| Agent orchestration | LangGraph |
-| LLMs | Groq (`langchain_groq`) |
-| Embeddings | Ollama (`langchain_ollama`) |
-| Vector store / long-term memory | Postgres + `pgvector` (`langchain_postgres`, `AsyncPostgresStore`) |
-| Short-term memory (checkpointing) | `AsyncPostgresSaver` |
-| Relational data | SQLAlchemy + Postgres |
-| Web search | Tavily |
-| Market data | `yfinance` |
-| Auth | `python-jose` (JWT) + `passlib`/`bcrypt` |
-
----
-
-## Setup
-
-### 1. Requirements
-
-- Python 3.11+
-- A running Postgres instance with the `vector` extension available (created automatically on first connect)
-- Ollama running locally (or reachable) for embeddings
-- API keys: Groq, Tavily
-
-### 2. Environment variables
-
-Create a `.env` file in `agent_full/`:
-
-| Variable | Required | Default | Notes |
-|---|---|---|---|
-| `GROQ_API_KEY` | ✅ | — | Main + classifier LLM calls |
-| `GROQ_MODEL_NAME` | | `openai/gpt-oss-20b` | Main agent model |
-| `GROQ_CLASSIFY_MODEL_NAME` | | `meta/llama-3.1-8b-instant` | Classifier/extractor nodes |
-| `OLLAMA_EMBEDDING_MODEL_NAME` | ✅ | — | Used for RAG + long-term memory embeddings |
-| `POSTGRESQL_DATABASE_LINK` | ✅ | `INVALID_LINK` | e.g. `postgresql://user:pass@host:5432/db` |
-| `TAVILY_API_KEY` | ✅ | — | Web search tool |
-| `JWT_SECRET` | ✅ | — | Signs access tokens |
-| `MAX_TOOL_CALLS` | | `5` | Cap on tool calls per turn |
-| `IS_DEVELOPMENT` | | `true` | |
-| `USE_PROXY` / `PROXY_LINK` | | `false` / — | Set if outbound calls need a proxy |
-
-### 3. Install & run
-
-```bash
-pip install -r requirements.txt   # or your preferred env manager
-
-uvicorn src.api.server:app --reload
-```
-
-On startup, `lifespan()` runs `migrate_users()` and `migrate_tickets_and_feedback()`,
-creating the `users`, `tickets`, and `feedback` tables if they don't exist.
-The `vector` extension and `pgvector` collection are created lazily the
-first time the engine/vector store is used.
-
----
-
-## API overview
-
-### Auth (`/auth`)
-| Method | Path | Notes |
-|---|---|---|
-| `POST` | `/auth/signup` | First account created becomes `admin` automatically |
-| `POST` | `/auth/login` | Form-encoded (`OAuth2PasswordRequestForm`), returns a JWT |
-
-### Chat
-| Method | Path | Notes |
-|---|---|---|
-| `WS` | `/ws/chat?token=<jwt>` | Send plain text messages, receive `{type: "token"/"tool_call"/"done"}` chunks streamed from the graph |
-
-### Admin
-| Method | Path | Notes |
-|---|---|---|
-| `POST` | `/admin/upload-file` | Admin-only. Accepts `.txt`/`.md`, chunks + embeds into the RAG vector store |
-| `GET` | `/admin/tickets` | Admin-only. Lists escalated support tickets, filterable by `user_id` |
-
-### Data
-| Method | Path | Notes |
-|---|---|---|
-| `GET` | `/data/{asset}` | Auth required. Returns recent OHLCV rows for `gold`/`dxy`/`silver`/`oil`/`sp500` |
-
-### Feedback
-| Method | Path | Notes |
-|---|---|---|
-| `POST` | `/chat/feedback` | Auth required. Rate a single assistant message `+1`/`-1`, see below |
-
----
-
-## Message feedback (👍 / 👎)
-
-Any authenticated user can rate a single assistant message. This is the
-first building block toward collecting preference data (e.g. for a future
-DPO fine-tuning pass or feedback-driven routing).
-
-**1. Getting a `message_id`** — each streamed token chunk over `/ws/chat`
-now includes the id of the message it belongs to:
-
-```json
-{ "type": "token", "content": "...", "message_id": "run-abc123" }
-```
-
-All chunks belonging to the same assistant message share the same
-`message_id` — the client should keep the **last** one it sees per message.
-
-**2. Submitting a rating:**
-
-```
-POST /chat/feedback
-Authorization: Bearer <jwt>
-Content-Type: application/json
-
-{
-  "thread_id": "<same thread_id used for the websocket session>",
-  "message_id": "run-abc123",
-  "rating": 1,           // +1 = like, -1 = dislike
-  "comment": "optional free-text note"
-}
-```
-
-```json
-{ "status": "ok", "feedback_id": 42 }
-```
-
-`rating` only accepts `-1` or `1` — there's no neutral/0 state by design.
-`thread_id` is currently the same value as `user_id` (see `chat.py`'s
-`config["configurable"]["thread_id"]`); if multiple concurrent threads per
-user are added later, make sure the client tracks the real `thread_id`.
-
-This is intentionally minimal — there's no admin "view all feedback"
-endpoint or dataset export yet. Add one on top of the `Feedback` model
-(`src/database/models.py`) when you're ready to build a preference dataset.
-
----
-
-## Known gaps / things to harden before production
-
-- CORS is wide open (`allow_origins=["*"]`)
-- No promote-to-admin route — the only way to get a second admin is direct DB access
-- `financial_data_tool` reads whatever is in `ohlcv_<asset>` tables — the ETL pipeline (`src/etl/`) needs to be run/scheduled separately to keep that data fresh
-- No rate limiting on `/chat/feedback` or the websocket endpoint
+FastAPI · LangGraph · LangChain (Groq / Ollama integrations) · SQLAlchemy + psycopg (v3) ·
+Postgres + pgvector · Tavily · yfinance/pandas (ETL) · vanilla JS/HTML/CSS frontend.

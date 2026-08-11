@@ -18,10 +18,12 @@ class Settings:
     )
 
     OLLAMA_MODEL_NAME: str = os.getenv("OLLAMA_MODEL_NAME", "qwen2.5-1.5b-instruct")
-    OLLAMA_EMBEDDING_MODEL_NAME: str = os.getenv("OLLAMA_EMBEDDING_MODEL_NAME")
 
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY")
     GOOGLE_MODEL_NAME: str = os.getenv("GOOGLE_MODEL_NAME", "qwen2.5-1.5b-instruct")
+    GOOGLE_EMBEDDING_MODEL_NAME: str = os.getenv(
+        "GOOGLE_EMBEDDING_MODEL_NAME", "models/gemini-embedding-001"
+    )
 
     POSTGRESQL_DATABASE_LINK: str = os.getenv(
         "POSTGRESQL_DATABASE_LINK", "INVALID_LINK"

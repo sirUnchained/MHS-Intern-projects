@@ -1,9 +1,8 @@
 from langchain_groq import ChatGroq
-from langchain_ollama.embeddings import OllamaEmbeddings
+from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 from psycopg.rows import dict_row
-from langchain_ollama.embeddings import OllamaEmbeddings
 
 from langgraph.store.postgres.aio import AsyncPostgresStore
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
@@ -43,7 +42,9 @@ async def build_graph():
         api_key=settings.GROQ_API_KEY,
         temperature=0.5,
     )
-    embedding_model = OllamaEmbeddings(model=settings.OLLAMA_EMBEDDING_MODEL_NAME)
+    embedding_model = GoogleGenerativeAIEmbeddings(
+        model=settings.GOOGLE_EMBEDDING_MODEL_NAME, api_key=settings.GOOGLE_API_KEY
+    )
 
     graph_builder = StateGraph(SupportState)
 
@@ -128,14 +129,13 @@ async def build_graph():
     graph_builder.add_edge("extract_data_after_agent_node", END)
 
     # Build and return graph
-    store, checkpointer = await setup_memory()
+    store, checkpointer = await setup_memory(embedding_model=embedding_model)
     return graph_builder.compile(checkpointer=checkpointer, store=store)
 
 
-async def setup_memory():
+async def setup_memory(embedding_model):
     settings = get_settings()
 
-    embedding_model = OllamaEmbeddings(model=settings.OLLAMA_EMBEDDING_MODEL_NAME)
     EMBED_DIMS = len(await embedding_model.aembed_query("dimension probe"))
 
     # --- Shared async connection pool (used by both store and checkpointer) ---
