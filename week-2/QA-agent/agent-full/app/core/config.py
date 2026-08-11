@@ -17,19 +17,20 @@ class Settings:
         "GROQ_CLASSIFY_MODEL_NAME", "meta/llama-3.1-8b-instant"
     )
 
-    OLLAMA_MODEL_NAME: str = os.getenv("OLLAMA_MODEL_NAME", "qwen2.5-1.5b-instruct")
-
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY")
     GOOGLE_MODEL_NAME: str = os.getenv("GOOGLE_MODEL_NAME", "qwen2.5-1.5b-instruct")
-    GOOGLE_EMBEDDING_MODEL_NAME: str = os.getenv(
-        "GOOGLE_EMBEDDING_MODEL_NAME", "models/gemini-embedding-001"
-    )
+    GOOGLE_EMBEDDING_MODEL_NAME: str = os.getenv("GOOGLE_EMBEDDING_MODEL_NAME")
 
     POSTGRESQL_DATABASE_LINK: str = os.getenv(
         "POSTGRESQL_DATABASE_LINK", "INVALID_LINK"
     )
 
     TAVILY_API_KEY: str = os.getenv("TAVILY_API_KEY")
+
+    MARKET_DATA_REFRESH_HOUR_UTC = int(os.getenv("MARKET_DATA_REFRESH_HOUR_UTC", "24"))
+    MARKET_DATA_REFRESH_MINUTE_UTC = int(
+        os.getenv("MARKET_DATA_REFRESH_MINUTE_UTC", "0")
+    )
 
     MAX_TOOL_CALLS: int = int(os.getenv("MAX_TOOL_CALLS", "5"))
 

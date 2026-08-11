@@ -43,7 +43,9 @@ async def build_graph():
         temperature=0.5,
     )
     embedding_model = GoogleGenerativeAIEmbeddings(
-        model=settings.GOOGLE_EMBEDDING_MODEL_NAME, api_key=settings.GOOGLE_API_KEY
+        model=settings.GOOGLE_EMBEDDING_MODEL_NAME,
+        api_key=settings.GOOGLE_API_KEY,
+        output_dimensionality=1536,
     )
 
     graph_builder = StateGraph(SupportState)

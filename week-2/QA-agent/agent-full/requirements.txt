@@ -4,6 +4,8 @@ python-multipart
 python-dotenv
 pydantic
 
+APScheduler
+
 sqlalchemy
 psycopg[binary]           
 psycopg-pool

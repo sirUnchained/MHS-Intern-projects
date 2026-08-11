@@ -38,7 +38,9 @@ async def upload_file(
 
     settings = get_settings()
     embedding_model = GoogleGenerativeAIEmbeddings(
-        model=settings.GOOGLE_EMBEDDING_MODEL_NAME, api_key=settings.GOOGLE_API_KEY
+        model=settings.GOOGLE_EMBEDDING_MODEL_NAME,
+        api_key=settings.GOOGLE_API_KEY,
+        output_dimensionality=1536,
     )
 
     chunks_stored = ingest_text(
