@@ -14,9 +14,12 @@ from app.features.chat_threads.router import router as chat_router
 from app.features.tickets.router import router as ticket_router
 from app.features.market_data.router import router as data_router
 from app.features.feedback.router import router as feedback_router
+from app.core.config import get_settings
+
+from etl.scheduler import start_scheduler, stop_scheduler, refresh_all_market_data_async
 
 import os
-from app.core.config import get_settings
+import asyncio
 
 load_dotenv()
 
@@ -36,7 +39,14 @@ async def lifespan(app: FastAPI):
     migrate_chat_threads()
     migrate_feedbacks()
     migrate_tickets()
+
+    # Fire-and-forget: don't block app startup on yfinance calls.
+    asyncio.create_task(refresh_all_market_data_async())
+    start_scheduler()
+
     yield
+
+    stop_scheduler()
 
 
 # =======================================================

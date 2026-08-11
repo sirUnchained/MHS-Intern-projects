@@ -3,4 +3,3 @@ diabet-analysis.joblib
 bak*
 *.7z
 .env
-scheduler.py

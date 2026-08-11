@@ -27,8 +27,11 @@ class Settings:
 
     TAVILY_API_KEY: str = os.getenv("TAVILY_API_KEY")
 
-    MARKET_DATA_REFRESH_HOUR_UTC = int(os.getenv("MARKET_DATA_REFRESH_HOUR_UTC", "24"))
-    MARKET_DATA_REFRESH_MINUTE_UTC = int(
+    MARKET_DATA_LOOKBACK_DAYS: int = int(os.getenv("MARKET_DATA_LOOKBACK_DAYS", "1825"))
+    MARKET_DATA_REFRESH_HOUR_UTC: int = int(
+        os.getenv("MARKET_DATA_REFRESH_HOUR_UTC", "10")
+    )
+    MARKET_DATA_REFRESH_MINUTE_UTC: int = int(
         os.getenv("MARKET_DATA_REFRESH_MINUTE_UTC", "0")
     )
 
@@ -41,6 +44,14 @@ class Settings:
     JWT_SECRET: str = os.getenv("JWT_SECRET")
 
 
+# Ticker used for each asset the ETL pipeline knows how to fetch.
+ASSET_TICKERS: dict[str, str] = {
+    "gold": "GC=F",
+    "dxy": "DX-Y.NYB",
+    "silver": "SI=F",
+    "oil": "CL=F",
+    "sp500": "^GSPC",
+}
 _settings = None
 
 
