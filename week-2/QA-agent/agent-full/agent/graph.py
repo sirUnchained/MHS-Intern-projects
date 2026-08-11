@@ -144,7 +144,7 @@ async def setup_memory(embedding_model):
     pool = AsyncConnectionPool(
         conninfo=settings.POSTGRESQL_DATABASE_LINK,
         kwargs={"autocommit": True, "row_factory": dict_row},
-        max_size=20,
+        max_size=5,
         open=False,
     )
     await pool.open()
