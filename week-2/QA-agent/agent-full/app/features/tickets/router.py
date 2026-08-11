@@ -24,7 +24,7 @@ def get_tickets(
     return query.order_by(Ticket.created_at.desc()).offset(skip).limit(limit).all()
 
 
-@router.get("/tickets/{ticket_id}")
+@router.delete("/tickets/{ticket_id}")
 def delete_ticket(
     ticket_id: int,
     db: Session = Depends(get_db),

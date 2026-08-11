@@ -1,4 +1,3 @@
-# Place this file at: week-2/QA-agent/agent-full/Dockerfile
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -7,11 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
-# psycopg (v3) needs libpq at build+runtime; gcc for any source builds (e.g. regex, bcrypt)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        gcc \
-        libpq-dev \
-        curl \
+    gcc \
+    libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
@@ -21,7 +19,6 @@ COPY . .
 
 EXPOSE 8000
 
-# Basic container healthcheck against the /health route already in app/main.py
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
     CMD curl -f http://localhost:8000/health || exit 1
 

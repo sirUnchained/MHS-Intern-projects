@@ -28,5 +28,4 @@ langchain-tavily
 
 langgraph
 langgraph-checkpoint-postgres   
-langgraph-store-postgres        
 langchain-google-genai
