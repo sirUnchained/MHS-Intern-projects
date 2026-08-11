@@ -1,0 +1,10 @@
+# Place this file at: week-2/QA-agent/agent-full/.dockerignore
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.git
+.gitignore
+frontend/
+*.md

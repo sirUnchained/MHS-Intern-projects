@@ -1,0 +1,64 @@
+# Place this file at: week-2/QA-agent/agent-full/docker-compose.yml
+version: "3.9"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: qa_agent
+      POSTGRES_PASSWORD: qa_agent
+      POSTGRES_DB: qa_agent
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U qa_agent -d qa_agent" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+      # After first `docker compose up`, pull whatever models you reference in .env, e.g.:
+      #   docker compose exec ollama ollama pull qwen2.5-1.5b-instruct
+      # docker compose exec ollama ollama pull qllama/bge-small-en-v1.5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Overrides .env — psycopg v3 dialect prefix is required here.
+      POSTGRESQL_DATABASE_LINK: postgresql+psycopg://qa_agent:qa_agent@postgres:5432/qa_agent
+      OLLAMA_HOST: http://ollama:11434
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  ollama_data:
