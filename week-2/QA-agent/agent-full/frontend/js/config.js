@@ -1,7 +1,7 @@
 window.Mana = window.Mana || {};
 
 Mana.BASE_URL = 'https://mhs-intern-projects.onrender.com';
-Mana.WS_URL = 'ws://mhs-intern-projects.onrender.com/chat/ws/chat';
+Mana.WS_URL = 'wss://mhs-intern-projects.onrender.com/chat/ws/chat';
 
 Mana.ASSETS = {
     gold: { label: 'طلای جهانی', icon: 'fa-coins' },
