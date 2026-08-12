@@ -30,6 +30,26 @@ def format_buildings_for_prompt() -> str:
 # building_classifier_and_ticket_node
 def get_building_classifier_and_ticket_node(llm):
     def building_classifier_and_ticket_node(state: SupportState) -> dict:
+        """
+        Classify the user's request and create a ticket with building assignment.
+
+        Uses an LLM to extract ticket details (topic, budget, job, goals) and
+        determine the appropriate support building. If no building is matched,
+        falls back to a default.
+
+        Args:
+            state (SupportState): Conversation state containing the last user message.
+
+        Returns:
+            dict: State update containing:
+                - "new_ticket": UserTicketData with building info and ticket fields
+                - "messages": Confirmation message redirecting the user
+
+        Note:
+            - Uses DEPARTMENT_CLASSIFIER_TOKEN_SYSTEM_PROMPT with available buildings
+            - Matches building by case-insensitive name comparison
+            - Default fallback building: SUPPORT_BUILDINGS[1] if no match found
+        """
         question = state["messages"][-1]
 
         result = safe_structured_invoke(

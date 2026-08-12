@@ -9,6 +9,20 @@ _engine: Engine | None = None
 
 # This pattern is singleton?
 def get_engine() -> Engine:
+    """
+    Get or create the SQLAlchemy database engine singleton.
+
+    Initializes the engine on first call and ensures the pgvector extension
+    is enabled in the database.
+
+    Returns:
+        Engine: Configured SQLAlchemy engine instance.
+
+    Note:
+        The engine is cached globally, subsequent calls return the same instance.
+        The pgvector extension is created automatically if it doesn't exist.
+    """
+
     global _engine
     if _engine is not None:
         return _engine

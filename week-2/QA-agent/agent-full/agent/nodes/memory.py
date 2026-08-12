@@ -43,6 +43,29 @@ class ExtractedFact(BaseModel):
 
 def get_extract_data_after_agent_node(llm):
     def extract_data_after_agent_node(state: SupportState, *, store: BaseStore):
+        """
+        Extract and store structured information from the conversation.
+
+        This node analyzes the last human-AI exchange using an LLM to extract
+        relevant facts (summary, category, topic, budget, job, goals). The
+        extracted data is persisted as a memory record if the LLM determines
+        it's worth saving.
+
+        Args:
+            state (SupportState): Conversation state containing messages and user_id.
+                The last human and AI messages are extracted for analysis.
+            store (BaseStore): Storage interface for persisting memory records.
+
+        Returns:
+            dict: State update (always empty). All side effects are external
+                (database persistence via the store).
+
+        Note:
+            - Only processes if the AI response is at least 50 words long
+            - Uses safe_structured_invoke with a fallback ExtractedFact object
+            - Records are stored under ("memories", user_id) namespace
+            - Returns early if no messages found or extraction is skipped
+        """
         messages = state["messages"]
         last_human_msg = next(
             (m for m in reversed(messages) if m.type == "human"), None

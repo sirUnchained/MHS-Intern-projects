@@ -3,6 +3,7 @@ from app.core.config import get_settings
 
 
 def get_search_tool():
+    """Get our tavily search tool"""
     settings = get_settings()
 
     search_tool = TavilySearch(

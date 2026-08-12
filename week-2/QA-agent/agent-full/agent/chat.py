@@ -15,7 +15,47 @@ async def get_graph():
 
 
 async def chat_stream(q: str, user_id: str, thread_id: str):
-    """Async generator yielding structured chunks for a websocket to forward."""
+    """
+    Stream chat responses from the LangGraph agent as structured events.
+
+    This async generator consumes messages from a conversational agent graph,
+    filtering for relevant nodes and yielding structured chunks suitable for
+    WebSocket forwarding to a frontend client.
+
+    Args:
+        q (str): The user's input message/question to process.
+        user_id (str): Unique identifier for the user, used to maintain
+            conversation context and user-specific state.
+        thread_id (str): Thread identifier that groups messages into a
+            conversation session. The agent uses this to maintain history
+            and provide coherent responses.
+
+    Yields:
+        dict: A structured chunk with one of two formats:
+
+        1. Tool call event:
+        ```python
+            {
+                "type": "tool_call",
+                "name": str,      # Name of the tool being invoked
+                "args": dict      # Arguments passed to the tool
+            }
+        ```
+
+        2. Text token event:
+        ```python
+            {
+                "type": "token",
+                "content": str,   # A piece of the assistant's response text
+                "message_id": str # ID to enable feedback (like/dislike) via
+                                  # POST /chat/feedback
+            }
+        ```
+
+    Notes:
+        - Only processes messages from three specific nodes:
+          main_agent_node, insert_ticket_node, building_classifier_and_ticket_node
+    """
 
     graph = await get_graph()
     config = {"configurable": {"thread_id": thread_id}}

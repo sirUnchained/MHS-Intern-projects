@@ -13,13 +13,25 @@ def get_insert_ticket_node():
 
     def insert_ticket_node(state: SupportState) -> dict[str, Any]:
         """
-        LangGraph node that inserts a support ticket into the database.
-        Expects state to contain:
-        - user_id (str)
-        - new_ticket (UserTicketData) – topic, budget, job, goals
-        - building (BuildingInfo) – name, phone, services
+        Insert a support ticket into the database.
 
-        Returns updated state with ticket_id and a flag.
+        Extracts ticket data from the conversation state and persists it.
+        The node expects the state to contain user_id and new_ticket fields
+        with all required ticket information.
+
+        Args:
+            state (SupportState): Conversation state containing:
+                - user_id (str): User identifier
+                - new_ticket (UserTicketData): Ticket details including topic,
+                  budget, job description, and goals
+
+        Returns:
+            dict[str, Any]: Updated state containing:
+                - ticket_id: The newly created ticket's ID
+                - flag: Status flag indicating success/failure
+
+        Raises:
+            ValueError: If user_id or new_ticket is missing from the state.
         """
         # Extract data from state
         user_id = state.get("user_id")

@@ -6,9 +6,21 @@ from typing import Literal
 def get_question_classifier_node(llm):
     def question_classifier_node(state: SupportState) -> dict:
         """
-        This is Router decistion node, in this node, llm must chose between 2 literals:
-        * rag
-        * escalate
+        Route user queries by classifying them into one of two paths.
+
+        Uses an LLM to determine if a question should be answered via RAG
+        retrieval or escalated to a human agent.
+
+        Args:
+            state (SupportState): Conversation state containing the message history.
+                The last message is classified.
+
+        Returns:
+            dict: State update containing the classification result. Expected
+                values are "rag" or "escalate".
+
+        Note:
+            Uses QUESTION_CLASSIFIER_SYSTEM_PROMPT to guide the LLM's routing decision.
         """
 
         question = state["messages"][-1]

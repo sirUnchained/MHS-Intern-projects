@@ -15,7 +15,24 @@ PII_PATTERNS = {
 
 
 def main_agent_response_validator_node(state: SupportState):
-    """Validate main agent response node"""
+    """
+    Validate agent responses for PII (Personally Identifiable Information)
+    before returning to the user. If sensitive data is detected, replaces
+    the response with a fallback message.
+
+    Args:
+        state (SupportState): Conversation state containing the message history.
+            The last message's text is checked against PII patterns.
+
+    Returns:
+        dict: State update containing:
+            - "agent_response_validation": "good" if no PII found, "bad" otherwise
+            - "messages": Updated message list with fallback response on failure
+
+    Note:
+        Uses PII_PATTERNS to detect sensitive data like emails, phone numbers,
+        or SSNs to prevent accidental data leakage.
+    """
 
     last_msg = state["messages"][-1].text
 

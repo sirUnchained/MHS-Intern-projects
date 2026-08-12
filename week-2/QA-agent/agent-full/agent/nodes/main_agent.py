@@ -17,6 +17,8 @@ def get_main_agent_node(llm, embedding_llm):
     ]
 
     def main_agent_node(state: SupportState, *, store: BaseStore) -> dict:
+        """This is the main agent node"""
+
         user_id = state["user_id"]
         namespace = ("memories", user_id)
 
