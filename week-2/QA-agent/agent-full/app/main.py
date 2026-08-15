@@ -15,16 +15,23 @@ from app.features.tickets.router import router as ticket_router
 from app.features.market_data.router import router as data_router
 from app.features.feedback.router import router as feedback_router
 from app.core.config import get_settings
+from app.core.logger import setup_logging
 
 from etl.scheduler import start_scheduler, stop_scheduler, refresh_all_market_data_async
 
 import os
 import asyncio
+import logging
 
 load_dotenv()
+settings = get_settings()
+
+# ======================== LOGGER =========================
+setup_logging(settings.LOG_LEVEL)
+logger = logging.getLogger(__name__)
+# =======================================================
 
 # ======================== PROXY =========================
-settings = get_settings()
 if settings.USE_PROXY:
     print("[INFO] proxy is set")
     os.environ["http_proxy"] = settings.PROXY_LINK

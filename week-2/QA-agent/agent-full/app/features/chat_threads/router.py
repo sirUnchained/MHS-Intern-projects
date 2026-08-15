@@ -21,6 +21,9 @@ from app.deps import get_db, get_current_user
 from app.features.auth.models import User
 from app.features.chat_threads.models import ChatThread
 
+import logging
+
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
@@ -64,6 +67,9 @@ async def get_thread_messages(
         .first()
     )
     if not thread:
+        logger.warning(
+            "Attempt to get chats in an unknown thread with id: %s", thread_id
+        )
         raise HTTPException(status_code=404, detail="Thread not found")
 
     graph = await get_graph()
@@ -88,6 +94,7 @@ async def delete_thread(
         .first()
     )
     if not thread:
+        logger.warning("Attempt to delete an unknown thread with id: %s", thread_id)
         raise HTTPException(status_code=404, detail="Thread not found")
 
     graph = await get_graph()
@@ -107,6 +114,7 @@ async def websocket_chat(
 ):
     payload = decode_access_token(token)
     if payload is None or "sub" not in payload:
+        logger.warning("Did not detect payload.")
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
@@ -123,12 +131,14 @@ async def websocket_chat(
             .first()
         )
     if owns_thread is None:
+        logger.warning("User %s attempt to get chats which is not for him.", user_id)
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
     await websocket.accept()
 
     try:
+        logger.info("WS connected | thread_id=%s | user_id=%s", thread_id, user_id)
         while True:
             user_message = await websocket.receive_text()
             async for chunk in chat_stream(
@@ -137,4 +147,4 @@ async def websocket_chat(
                 await websocket.send_json(chunk)
             await websocket.send_json({"type": "done"})
     except WebSocketDisconnect:
-        pass
+        logger.info("WS disconnected | thread_id=%s", thread_id)

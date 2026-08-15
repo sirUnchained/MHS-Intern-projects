@@ -43,25 +43,10 @@ class Settings:
 
     JWT_SECRET: str = os.getenv("JWT_SECRET")
 
-
-# Ticker used for each asset the ETL pipeline knows how to fetch.
-ASSET_TICKERS: dict[str, str] = {
-    "gold": "GC=F",
-    "dxy": "DX-Y.NYB",
-    "silver": "SI=F",
-    "oil": "CL=F",
-    "sp500": "^GSPC",
-}
-_settings = None
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 
 
-def get_settings() -> Settings:
-    global _settings
-    if _settings is None:
-        _settings = Settings()
-    return _settings
-
-
+# Current support buildings
 SUPPORT_BUILDINGS: list[BuildingInfo] = [
     {
         "name": "Building finance - Billing & Payments",
@@ -79,3 +64,19 @@ SUPPORT_BUILDINGS: list[BuildingInfo] = [
         "services": ["general inquiries", "anything not covered elsewhere"],
     },
 ]
+# Ticker used for each asset the ETL pipeline knows how to fetch.
+ASSET_TICKERS: dict[str, str] = {
+    "gold": "GC=F",
+    "dxy": "DX-Y.NYB",
+    "silver": "SI=F",
+    "oil": "CL=F",
+    "sp500": "^GSPC",
+}
+_settings = None
+
+
+def get_settings() -> Settings:
+    global _settings
+    if _settings is None:
+        _settings = Settings()
+    return _settings

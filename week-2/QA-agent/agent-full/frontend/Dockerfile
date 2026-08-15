@@ -1,4 +1,3 @@
-# Place this file at: week-2/QA-agent/agent-full/frontend/Dockerfile
 FROM nginx:alpine
 
 COPY . /usr/share/nginx/html

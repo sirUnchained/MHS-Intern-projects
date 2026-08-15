@@ -7,6 +7,9 @@ from app.features.auth.models import User
 from app.features.tickets.models import Ticket
 from app.features.tickets.schemas import TicketOut
 
+import logging
+
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
@@ -41,6 +44,7 @@ def delete_ticket(
     ticket = query.first()
 
     if not ticket:
+        logger.warning("Attemped to delete an unknown ticked, id: %d", ticket_id)
         raise HTTPException(status_code=404, detail="Ticket not found")
 
     # Delete the ticket

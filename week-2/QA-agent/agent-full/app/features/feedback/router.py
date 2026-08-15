@@ -6,6 +6,9 @@ from app.features.auth.models import User
 from app.features.feedback.models import Feedback
 from app.features.feedback.schemas import FeedbackIn
 
+import logging
+
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/chat", tags=["feedback"])
 
 

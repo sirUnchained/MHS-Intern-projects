@@ -11,6 +11,9 @@ from app.core.security import (
     create_access_token,
 )
 
+import logging
+
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -26,6 +29,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def signup(payload: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.username == payload.username).first()
     if existing:
+        logger.warning("Signup attempt with taken username: %s", payload.username)
         raise HTTPException(status_code=400, detail="Username already taken")
 
     # Simplest possible bootstrap: the very first account becomes admin,
@@ -40,6 +44,8 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    logger.info("New user created: %s (role=%s)", user.username, user.role.value)
     return user
 
 
@@ -61,4 +67,6 @@ def login(
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     token = create_access_token({"sub": user.username, "role": user.role.value})
+
+    logger.info("User signed in: %s (role=%s)", user.username, user.role.value)
     return Token(access_token=token)

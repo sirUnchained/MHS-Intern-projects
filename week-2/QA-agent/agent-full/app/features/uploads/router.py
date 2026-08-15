@@ -6,6 +6,9 @@ from app.features.auth.models import User
 from agent.rag.ingest import ingest_text
 from app.core.config import get_settings
 
+import logging
+
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 ALLOWED_EXTENSIONS = {".txt", ".md"}
@@ -23,8 +26,27 @@ ALLOWED_EXTENSIONS = {".txt", ".md"}
 async def upload_file(
     file: UploadFile = File(...), admin: User = Depends(require_admin)
 ):
+    """
+    Uploads a text or markdown file to the RAG knowledge base.
+
+    This endpoint accepts a UTF-8 encoded .txt or .md file, chunks its content,
+    generates embeddings using Google's Gemini model, and stores the resulting
+    vectors in the vector database for retrieval by the agent.
+
+    Args:
+        file (UploadFile): The file to upload. Must have a '.txt' or '.md'
+            extension and be UTF-8 encoded.
+        admin (User): The currently authenticated admin user, injected by the
+            `require_admin` dependency.
+
+    """
+
     ext = "." + file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
     if ext not in ALLOWED_EXTENSIONS:
+        logger.warning(
+            f"Rejected upload from admin='{admin.username}': "
+            f"unsupported extension '{ext}' for file '{file.filename}'"
+        )
         raise HTTPException(
             status_code=400,
             detail=f"Only {sorted(ALLOWED_EXTENSIONS)} files are supported for now",
@@ -34,6 +56,9 @@ async def upload_file(
     try:
         text = raw_bytes.decode("utf-8")
     except UnicodeDecodeError:
+        logger.warning(
+            f"UTF-8 decode failed for file '{file.filename}' uploaded by admin='{admin.username}'"
+        )
         raise HTTPException(status_code=400, detail="File must be UTF-8 text")
 
     settings = get_settings()
