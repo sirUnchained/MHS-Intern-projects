@@ -4,3 +4,4 @@ bak*
 *.7z
 .env
 logs
+.venv

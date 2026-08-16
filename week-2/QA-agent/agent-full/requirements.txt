@@ -1,4 +1,5 @@
 apscheduler==3.11.3
+bcrypt
 fastapi==0.141.1
 langchain
 langchain_core
@@ -21,7 +22,6 @@ psycopg-binary==3.3.4
 psycopg2-binary==2.9.12
 pydantic==2.13.4
 python-dotenv==1.2.2
-python_bcrypt==0.3.2
 python_jose==3.5.0
 python-multipart
 regex==2026.4.4
