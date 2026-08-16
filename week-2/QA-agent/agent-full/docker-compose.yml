@@ -28,11 +28,15 @@ services:
     environment:
       # Overrides .env — psycopg v3 dialect prefix is required here.
       POSTGRESQL_DATABASE_LINK: postgresql+psycopg://qa_agent:qa_agent@postgres:5432/qa_agent
+      # Overrides .env — the proxy url
+      PROXY_LINK: http://host.docker.internal:8889
     depends_on:
       postgres:
         condition: service_healthy
     ports:
       - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build:

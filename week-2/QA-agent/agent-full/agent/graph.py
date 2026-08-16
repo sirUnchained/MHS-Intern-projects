@@ -46,6 +46,7 @@ async def build_graph():
         model=settings.GOOGLE_EMBEDDING_MODEL_NAME,
         api_key=settings.GOOGLE_API_KEY,
         output_dimensionality=settings.GOOGLE_EMBEDDING_MODEL_DIMS,
+        # transport="rest",  # By default it uses GRPC but we need REST if we use proxy
     )
 
     graph_builder = StateGraph(SupportState)
@@ -140,9 +141,15 @@ async def setup_memory(embedding_model):
 
     EMBED_DIMS = len(await embedding_model.aembed_query("dimension probe"))
 
+    # psycopg's AsyncConnectionPool expects a plain libpq conninfo string and it doesn't understand
+    # SQLAlchemy's "+psycopg" dialect suffix, only SQLAlchemy's create_engine() does. Strip it here.
+    raw_conninfo = settings.POSTGRESQL_DATABASE_LINK.replace(
+        "postgresql+psycopg://", "postgresql://"
+    )
+
     # --- Shared async connection pool (used by both store and checkpointer) ---
     pool = AsyncConnectionPool(
-        conninfo=settings.POSTGRESQL_DATABASE_LINK,
+        conninfo=raw_conninfo,
         kwargs={"autocommit": True, "row_factory": dict_row},
         max_size=5,
         open=False,

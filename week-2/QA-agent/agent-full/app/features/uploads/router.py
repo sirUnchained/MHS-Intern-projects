@@ -66,6 +66,7 @@ async def upload_file(
         model=settings.GOOGLE_EMBEDDING_MODEL_NAME,
         api_key=settings.GOOGLE_API_KEY,
         output_dimensionality=settings.GOOGLE_EMBEDDING_MODEL_DIMS,
+        # transport="rest",  # By default it uses GRPC but we need REST if we use proxy
     )
 
     chunks_stored = ingest_text(
