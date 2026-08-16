@@ -45,7 +45,7 @@ async def build_graph():
     embedding_model = GoogleGenerativeAIEmbeddings(
         model=settings.GOOGLE_EMBEDDING_MODEL_NAME,
         api_key=settings.GOOGLE_API_KEY,
-        output_dimensionality=1536,
+        output_dimensionality=settings.GOOGLE_EMBEDDING_MODEL_DIMS,
     )
 
     graph_builder = StateGraph(SupportState)

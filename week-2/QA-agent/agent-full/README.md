@@ -147,7 +147,7 @@ Set these in `agent-full/.env`.
 | `GOOGLE_API_KEY` | *(blank — required for embeddings)* | Used for the embedding model (and optionally for chat if you wire Google as a provider). |
 | `GOOGLE_MODEL_NAME` | `gemini-3.6-flash` | (Optional) Chat model if you switch the graph to use Google instead of Groq — not wired by default. |
 | `GOOGLE_CLASSIFY_MODEL_NAME` | `gemini-3.6-flash` | (Optional) Classification model if you switch — not wired by default. |
-| `GOOGLE_EMBEDDING_MODEL_NAME` | `models/embedding-001` | **Required.** The embedding model to use for RAG ingestion/retrieval, long‑term memory store, and admin uploads. Must be a model available via the Google AI Studio or Vertex AI API. |
+| `GOOGLE_EMBEDDING_MODEL_DIMS` | `1536` | **Required.** The embedding model dimension size, it must be less than 2000 because we use postgresql and it has this limit. |
 | `TAVILY_API_KEY` | *(blank — required)* | Powers `agent/tools/search_tool.py` (finance‑scoped web search). |
 | `POSTGRESQL_DATABASE_LINK` | `postgresql+psycopg://postgres:11111111@127.0.0.1:5432/support_agent_postgres` | Must use the `postgresql+psycopg://` prefix (psycopg v3), not `postgresql://`. Change the host to `postgres` when running via `docker compose` instead of `127.0.0.1`. |
 | `MARKET_DATA_LOOKBACK_DAYS` | `30` | Number of days of historical OHLCV data the `financial_data_tool` will retrieve from the database. |
