@@ -1,7 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 
 from app.features.auth.models import migrate as migrate_users
 from app.features.chat_threads.models import migrate as migrate_chat_threads
@@ -23,7 +22,6 @@ import os
 import asyncio
 import logging
 
-load_dotenv()
 settings = get_settings()
 
 # ======================== LOGGER =========================
@@ -33,6 +31,9 @@ logger = logging.getLogger(__name__)
 
 # ======================== PROXY =========================
 if settings.USE_PROXY:
+    print(type(settings.USE_PROXY))
+    print(settings.USE_PROXY)
+
     print("[INFO] proxy is set")
     os.environ["http_proxy"] = settings.PROXY_LINK
     os.environ["https_proxy"] = settings.PROXY_LINK
