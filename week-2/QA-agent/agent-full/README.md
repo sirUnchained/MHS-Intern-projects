@@ -155,9 +155,10 @@ Set these in `agent-full/.env`.
 | `MARKET_DATA_REFRESH_MINUTE_UTC` | `0` | Minute (0–59 UTC) for the same scheduled refresh. |
 | `IS_DEVELOPMENT` | `false` | Currently declared but not branched on anywhere in the code shown — reserved for future use. |
 | `USE_PROXY` | `false` | If `true`, `app/main.py` sets `http_proxy`/`https_proxy` env vars for outbound requests (e.g. Tavily, yfinance). |
-| `PROXY_LINK` | `http://127.0.0.1:8889/` | ⚠️ If you run the backend in Docker, `127.0.0.1` resolves to *the container*, not your host — a host‑machine proxy at this address will be unreachable. Either run the proxy inside the same Docker network and point this at that service's name, or use `host.docker.internal` instead of `127.0.0.1` (Docker Desktop) / your host's Docker‑bridge IP (Linux). |
+| `PROXY_LINK` | `http://127.0.0.1:8889/` | If you run the backend in Docker, `127.0.0.1` resolves to *the container*, not your host — a host‑machine proxy at this address will be unreachable. Either run the proxy inside the same Docker network and point this at that service's name, or use `host.docker.internal` instead of `127.0.0.1` (Docker Desktop) / your host's Docker‑bridge IP (Linux). |
 | `MAX_TOOL_CALLS` | `5` | Hard cap on tool calls per turn before the agent is forced to answer with what it already has. |
 | `JWT_SECRET` | *(pick something long and random)* | Used to sign auth tokens — treat as a real secret, don't ship the placeholder value in the example above. Generate one with `openssl rand -hex 32`. |
+| `PORT` | `8000` | The port which backend open and listen to (required for render.com) |
 
 ---
 
