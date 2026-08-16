@@ -1,7 +1,15 @@
 window.Mana = window.Mana || {};
 
-Mana.BASE_URL = 'https://mhs-intern-projects.onrender.com';
-Mana.WS_URL = 'wss://mhs-intern-projects.onrender.com/chat/ws/chat';
+(function () {
+    const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+    const PROD_BASE_URL = 'https://mhs-intern-projects.onrender.com';
+    const LOCAL_BASE_URL = 'http://127.0.0.1:8000';
+
+    Mana.BASE_URL = isLocal ? LOCAL_BASE_URL : PROD_BASE_URL;
+    Mana.WS_URL = Mana.BASE_URL.replace(/^http/, 'ws') + '/chat/ws/chat';
+})();
+
 
 Mana.ASSETS = {
     gold: { label: 'طلای جهانی', icon: 'fa-coins' },
