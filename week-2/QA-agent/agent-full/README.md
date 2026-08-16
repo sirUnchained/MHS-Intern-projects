@@ -146,7 +146,7 @@ Set these in `agent-full/.env`.
 | `GROQ_CLASSIFY_MODEL_NAME` | `llama-3.1-8b-instant` | Used for the question classifier and building/ticket classifier nodes — this is the **only** classify‑model variable actually read by `app/core/config.py`. |
 | `GOOGLE_API_KEY` | *(blank — required for embeddings)* | Used for the embedding model (and optionally for chat if you wire Google as a provider). |
 | `GOOGLE_MODEL_NAME` | `gemini-3.6-flash` | (Optional) Chat model if you switch the graph to use Google instead of Groq — not wired by default. |
-| `GOOGLE_CLASSIFY_MODEL_NAME` | `gemini-3.6-flash` | (Optional) Classification model if you switch — not wired by default. |
+| `GOOGLE_EMBEDDING_MODEL_NAME` | `models/gemini-embedding-2` | This is our embedding model which we use in project. |
 | `GOOGLE_EMBEDDING_MODEL_DIMS` | `1536` | **Required.** The embedding model dimension size, it must be less than 2000 because we use postgresql and it has this limit. |
 | `TAVILY_API_KEY` | *(blank — required)* | Powers `agent/tools/search_tool.py` (finance‑scoped web search). |
 | `POSTGRESQL_DATABASE_LINK` | `postgresql+psycopg://postgres:11111111@127.0.0.1:5432/support_agent_postgres` | Must use the `postgresql+psycopg://` prefix (psycopg v3), not `postgresql://`. Change the host to `postgres` when running via `docker compose` instead of `127.0.0.1`. |

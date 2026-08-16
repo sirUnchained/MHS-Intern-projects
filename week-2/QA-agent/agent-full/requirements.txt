@@ -17,6 +17,7 @@ langgraph-sdk
 orjson>=3.12.0
 pandas==3.0.5
 passlib==1.7.4
+psycopg2-binary==2.9.12
 psycopg-binary==3.3.4
 psycopg_pool==3.3.1
 pydantic==2.13.4
