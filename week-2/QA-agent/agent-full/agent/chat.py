@@ -81,8 +81,6 @@ async def chat_stream(q: str, user_id: str, thread_id: str):
                     "args": tc.get("args"),
                 }
         elif msg_chunk.text:
-            # message_id lets the frontend attach a like/dislike to this
-            # specific assistant message later via POST /chat/feedback.
             yield {
                 "type": "token",
                 "content": msg_chunk.text,

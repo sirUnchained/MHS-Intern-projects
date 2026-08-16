@@ -52,6 +52,10 @@ Return exactly one of these strings:
 
 ## Examples
 
+User: "Hi"
+Output:
+rag
+
 User: "What is Intelligent Robo?"
 Output:
 rag

@@ -124,7 +124,6 @@ async def websocket_chat(
     engine = get_engine()
     SessionLocal = sessionmaker(bind=engine)
     with SessionLocal() as db:
-        print(payload)
         owns_thread = (
             db.query(ChatThread)
             .filter(ChatThread.thread_id == thread_id, ChatThread.user_id == user_id)

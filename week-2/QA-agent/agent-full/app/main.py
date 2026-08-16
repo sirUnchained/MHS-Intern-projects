@@ -31,10 +31,7 @@ logger = logging.getLogger(__name__)
 
 # ======================== PROXY =========================
 if settings.USE_PROXY:
-    print(type(settings.USE_PROXY))
-    print(settings.USE_PROXY)
-
-    print("[INFO] proxy is set")
+    logger.info("proxy is set: %s", settings.PROXY_LINK)
     os.environ["http_proxy"] = settings.PROXY_LINK
     os.environ["https_proxy"] = settings.PROXY_LINK
 # =======================================================
